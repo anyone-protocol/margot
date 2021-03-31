@@ -101,11 +101,11 @@ impl FromStr for FindFilter {
         if let Some(kv) = s.split_once(':') {
             let filter = match kv.0 {
                 "a" | "addr" => Ok(FindFilter::Address(kv.1.parse().unwrap())),
-                "fl" | "flags" => Ok(FindFilter::Flags(util::parse_routerflag(kv.1))),
+                "fl" | "flag" => Ok(FindFilter::Flags(util::parse_routerflag(kv.1))),
                 "f" | "fp" => Ok(FindFilter::Fingerprint(
                     kv.1.parse::<util::RelayFingerprint>()?,
                 )),
-                "n" | "nickname" => Ok(FindFilter::Nickname(String::from(kv.1))),
+                "n" | "nick" => Ok(FindFilter::Nickname(String::from(kv.1))),
                 "p" | "port" => Ok(FindFilter::Port(kv.1.parse().unwrap())),
                 "v" | "version" => Ok(FindFilter::Version(String::from(kv.1))),
                 _ => Err(Error::UnrecognizedFilter(kv.0.to_string())),
