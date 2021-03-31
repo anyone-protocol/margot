@@ -3,12 +3,9 @@ use async_trait::async_trait;
 use std::fmt;
 use structopt::StructOpt;
 
-use crate::commands::Runnable;
-
-use tor_client::TorClient;
-
 use crate::commands::find;
 use crate::commands::util;
+use crate::commands::RunnableOffline;
 
 #[derive(StructOpt)]
 pub struct CountCommand {
@@ -25,31 +22,22 @@ impl fmt::Display for CountCommand {
 }
 
 #[async_trait]
-impl Runnable for CountCommand {
-    async fn run(&self, tor_client: &TorClient) -> Result<()> {
-        let netdir = tor_client.dirmgr().netdir().await;
-
+impl RunnableOffline for CountCommand {
+    fn run(&self, netdir: &tor_netdir::NetDir) -> Result<()> {
         // We'll go filter by filter and then do a final count of all filters.
         for filter in &self.filters {
-            // XXX: Need to do this for every filter since we can't copy the
-            // object inside the Vec (tor_netdir::Relay) and we filter it in
-            // place using the find command.
-            let mut relays: Vec<_> = netdir.relays().collect();
-            let mut find = find::FindCommand::new();
-            find.add(filter);
-            find.filter(&mut relays);
-            println!("[+] {} relays match: {:?}", relays.len(), filter);
+            let count = netdir.relays().filter(|r| filter.match_relay(r)).count();
+            println!("[+] {} relays match: {:?}", count, filter);
             if self.list {
+                let find = find::FindCommand::new(&vec![filter.clone()]);
+                let relays = find.filter(netdir);
                 util::describe_relays(&relays, true, 4);
             }
         }
 
         // Count relays with matching all filters together.
-        let mut relays: Vec<_> = netdir.relays().collect();
-        let mut find = find::FindCommand::new();
-        find.add_many(&self.filters);
-        find.filter(&mut relays);
-        println!("[+] {} relays matched all", relays.len());
+        let find = find::FindCommand::new(&self.filters);
+        println!("[+] {} relays matched all", find.count(netdir));
 
         Ok(())
     }

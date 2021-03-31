@@ -1,6 +1,6 @@
 use hex;
-use prettytable::Table;
 use prettytable::format;
+use prettytable::Table;
 use std::str::FromStr;
 
 use crate::commands::err::Error;
@@ -86,11 +86,15 @@ pub fn describe_relays(relays: &Vec<tor_netdir::Relay>, oneline: bool, indent: u
     let tfmt = format::FormatBuilder::new()
         .column_separator('|')
         .borders('|')
-        .separators(&[format::LinePosition::Top,
-            format::LinePosition::Intern,
-            format::LinePosition::Title,
-            format::LinePosition::Bottom],
-            format::LineSeparator::new('-', '+', '+', '+'))
+        .separators(
+            &[
+                format::LinePosition::Top,
+                format::LinePosition::Intern,
+                format::LinePosition::Title,
+                format::LinePosition::Bottom,
+            ],
+            format::LineSeparator::new('-', '+', '+', '+'),
+        )
         .padding(1, 1)
         .indent(indent)
         .build();

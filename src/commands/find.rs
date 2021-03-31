@@ -7,11 +7,10 @@ use structopt::StructOpt;
 
 use crate::commands::err::Error;
 use crate::commands::util;
-use crate::commands::Runnable;
+use crate::commands::RunnableOffline;
 
-use tor_client::TorClient;
-use tor_netdoc::doc::netstatus;
 use tor_netdir;
+use tor_netdoc::doc::netstatus;
 
 #[derive(Debug, Clone)]
 pub enum FindFilter {
@@ -38,27 +37,33 @@ pub struct FindCommand {
 }
 
 impl FindCommand {
-    pub fn new() -> Self {
-        FindCommand { oneline: false, filters: Vec::new() }
-    }
-
-    pub fn filter(&self, relays: &mut Vec<tor_netdir::Relay>)  {
-        for filter in &self.filters {
-            relays.drain_filter(|r| !filter.match_relay(r));
+    pub fn new(filters: &Vec<FindFilter>) -> Self {
+        FindCommand {
+            oneline: false,
+            filters: filters.to_vec(),
         }
     }
 
-    pub fn add(&mut self, filter: &FindFilter) {
-        self.filters.push(filter.clone());
+    pub fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
+        for filter in &self.filters {
+            if !filter.match_relay(relay) {
+                return false;
+            }
+        }
+        true
     }
 
-    pub fn add_many(&mut self, filters: &Vec<FindFilter>) {
-        self.filters = filters.to_vec();
+    pub fn filter<'a>(&self, netdir: &'a tor_netdir::NetDir) -> Vec<tor_netdir::Relay<'a>> {
+        netdir.relays().filter(|r| self.match_relay(r)).collect()
+    }
+
+    pub fn count(&self, netdir: &tor_netdir::NetDir) -> usize {
+        netdir.relays().filter(|r| self.match_relay(r)).count()
     }
 }
 
 impl FindFilter {
-    fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
+    pub fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
         match self {
             FindFilter::Address(a) => relay
                 .rs()
@@ -112,12 +117,9 @@ impl FromStr for FindFilter {
 }
 
 #[async_trait]
-impl Runnable for FindCommand {
-    async fn run(&self, tor_client: &TorClient) -> Result<()> {
-        let netdir = tor_client.dirmgr().netdir().await;
-        let mut relays: Vec<_> = netdir.relays().collect();
-
-        self.filter(&mut relays);
+impl RunnableOffline for FindCommand {
+    fn run(&self, netdir: &tor_netdir::NetDir) -> Result<()> {
+        let relays = self.filter(netdir);
 
         if relays.is_empty() {
             println!("[-] No relays found");
