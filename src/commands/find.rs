@@ -13,7 +13,7 @@ use tor_netdir;
 use tor_netdoc::doc::netstatus;
 
 #[derive(Debug, Clone)]
-pub enum FindFilter {
+pub enum Filter {
     /// Address or Network
     Address(IpNetwork),
     /// Relay fingerprint
@@ -26,6 +26,47 @@ pub enum FindFilter {
     Port(u16),
     /// Relay version
     Version(String),
+}
+
+#[derive(Debug, Clone)]
+pub struct FindFilter {
+    exclude: bool,
+    filter: Filter,
+}
+
+impl FindFilter {
+    pub fn new(n: bool, f: Filter) -> Self {
+        Self {
+            exclude: n,
+            filter: f,
+        }
+    }
+
+    pub fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
+        let mut ret = match &self.filter {
+            Filter::Address(a) => relay
+                .rs()
+                .orport_addrs()
+                .find(|addr| a.contains(addr.ip()))
+                .is_some(),
+            Filter::Nickname(n) => relay.rs().nickname().contains(n),
+            Filter::Fingerprint(fp) => fp.match_relay(relay),
+            Filter::Flags(f) => relay.rs().flags().contains(*f),
+            Filter::Port(p) => relay
+                .rs()
+                .orport_addrs()
+                .find(|addr| addr.port() == *p)
+                .is_some(),
+            Filter::Version(v) => relay
+                .rs()
+                .version()
+                .as_ref()
+                .unwrap_or(&"".to_string())
+                .contains(v),
+        };
+        ret ^= self.exclude;
+        ret
+    }
 }
 
 #[derive(StructOpt)]
@@ -62,32 +103,6 @@ impl FindCommand {
     }
 }
 
-impl FindFilter {
-    pub fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
-        match self {
-            FindFilter::Address(a) => relay
-                .rs()
-                .orport_addrs()
-                .find(|addr| a.contains(addr.ip()))
-                .is_some(),
-            FindFilter::Nickname(n) => relay.rs().nickname().contains(n),
-            FindFilter::Fingerprint(fp) => fp.match_relay(relay),
-            FindFilter::Flags(f) => relay.rs().flags().contains(*f),
-            FindFilter::Port(p) => relay
-                .rs()
-                .orport_addrs()
-                .find(|addr| addr.port() == *p)
-                .is_some(),
-            FindFilter::Version(v) => relay
-                .rs()
-                .version()
-                .as_ref()
-                .unwrap_or(&"".to_string())
-                .contains(v),
-        }
-    }
-}
-
 impl fmt::Display for FindCommand {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.filters)
@@ -98,19 +113,18 @@ impl FromStr for FindFilter {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some(kv) = s.split_once(':') {
+        let exclude = s.find("-:").is_some();
+        if let Some(kv) = s.to_string().replace("-", "").split_once(':') {
             let filter = match kv.0 {
-                "a" | "addr" => Ok(FindFilter::Address(kv.1.parse().unwrap())),
-                "fl" | "flag" => Ok(FindFilter::Flags(util::parse_routerflag(kv.1))),
-                "f" | "fp" => Ok(FindFilter::Fingerprint(
-                    kv.1.parse::<util::RelayFingerprint>()?,
-                )),
-                "n" | "nick" => Ok(FindFilter::Nickname(String::from(kv.1))),
-                "p" | "port" => Ok(FindFilter::Port(kv.1.parse().unwrap())),
-                "v" | "version" => Ok(FindFilter::Version(String::from(kv.1))),
-                _ => Err(Error::UnrecognizedFilter(kv.0.to_string())),
+                "a" | "addr" => Filter::Address(kv.1.parse().unwrap()),
+                "fl" | "flag" => Filter::Flags(util::parse_routerflag(kv.1)),
+                "f" | "fp" => Filter::Fingerprint(kv.1.parse::<util::RelayFingerprint>()?),
+                "n" | "nick" => Filter::Nickname(String::from(kv.1)),
+                "p" | "port" => Filter::Port(kv.1.parse().unwrap()),
+                "v" | "version" => Filter::Version(String::from(kv.1)),
+                _ => return Err(Error::UnrecognizedFilter(kv.0.to_string())),
             };
-            return filter;
+            return Ok(FindFilter::new(exclude, filter));
         }
         return Err(Error::InvalidFilter(s.to_string()));
     }

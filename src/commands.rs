@@ -1,6 +1,7 @@
 mod count;
 mod err;
 mod find;
+mod sybil;
 mod util;
 
 use anyhow::Result;
@@ -33,6 +34,8 @@ pub enum SubCommand {
     Count(count::CountCommand),
     #[structopt(name = "find", about = "Find relay(s) in the consensus")]
     Find(find::FindCommand),
+    #[structopt(name = "sybil", about = "Sybil testing")]
+    Sybil(sybil::SybilCommand),
 }
 
 impl SubCommand {
@@ -40,6 +43,7 @@ impl SubCommand {
         match self {
             SubCommand::Count(c) => Box::new(c),
             SubCommand::Find(c) => Box::new(c),
+            SubCommand::Sybil(c) => Box::new(c),
         }
     }
 }

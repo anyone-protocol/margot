@@ -22,6 +22,7 @@ futures = "0.3"
 async-trait = "0.1"
 prettytable-rs = "0.8"
 ipnetwork = "0.17"
+multimap = "0.8"
 
 tor-client = { path = "../arti/tor-client", version = "*", features = ["experimental-api"] }
 tor-config = { path = "../arti/tor-config", version = "*" }
