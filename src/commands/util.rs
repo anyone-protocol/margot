@@ -1,0 +1,136 @@
+use hex;
+use prettytable::Table;
+use prettytable::format;
+use std::str::FromStr;
+
+use crate::commands::err::Error;
+
+use tor_netdoc::doc::netstatus;
+
+#[derive(Debug, Clone)]
+pub enum RelayFingerprint {
+    /// RSA identity fingerprint
+    RSA(String),
+    /// ed25519 identity fingerprint
+    ED(String),
+}
+
+impl FromStr for RelayFingerprint {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let fp = match s.len() {
+            40 => {
+                if hex::decode(s).is_err() {
+                    return Err(Error::UndecodableFingerprint(s.to_string()));
+                }
+                RelayFingerprint::RSA(s.to_string())
+            }
+            43 => RelayFingerprint::ED(s.to_string()),
+            _ => return Err(Error::WrongFingerprintLength(s.to_string())),
+        };
+        Ok(fp)
+    }
+}
+
+impl RelayFingerprint {
+    pub fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
+        match self {
+            RelayFingerprint::RSA(rsa) => rsa.to_lowercase() == relay.rsa_id().to_string(),
+            RelayFingerprint::ED(ed) => *ed == relay.id().to_string(),
+        }
+    }
+}
+
+fn get_version(r: &tor_netdir::Relay) -> String {
+    r.rs()
+        .version()
+        .as_ref()
+        .unwrap_or(&"<Unknown>".to_string())
+        .clone()
+}
+
+fn get_orports(r: &tor_netdir::Relay) -> String {
+    r.rs()
+        .orport_addrs()
+        .map(ToString::to_string)
+        .collect::<Vec<String>>()
+        .join(", ")
+}
+
+fn describe_relay(r: &tor_netdir::Relay) {
+    println!("[+] Nickname: {}", r.rs().nickname());
+    println!(
+        "  > Fingerprint: RSA: {}, ED: {}",
+        r.rsa_id().to_string().to_uppercase(),
+        r.md().ed25519_id().to_string()
+    );
+    println!("  > Flags: {:?}", r.rs().flags());
+    println!("  > Weight: {:?}", r.rs().weight());
+    println!("  > Version: {}", get_version(r));
+    println!("  > ORPort(s): {}", get_orports(r));
+    println!("  > IPv4 Policy: {}", r.ipv4_policy());
+    println!("  > IPv6 Policy: {}", r.ipv6_policy());
+    println!(
+        "  > Family: {}",
+        r.md()
+            .family()
+            .members()
+            .map(|f| f.to_string().to_uppercase().replace("$", ""))
+            .collect::<Vec<String>>()
+            .join(" ")
+    );
+}
+
+pub fn describe_relays(relays: &Vec<tor_netdir::Relay>, oneline: bool, indent: usize) {
+    let tfmt = format::FormatBuilder::new()
+        .column_separator('|')
+        .borders('|')
+        .separators(&[format::LinePosition::Top,
+            format::LinePosition::Intern,
+            format::LinePosition::Title,
+            format::LinePosition::Bottom],
+            format::LineSeparator::new('-', '+', '+', '+'))
+        .padding(1, 1)
+        .indent(indent)
+        .build();
+    let mut table = Table::new();
+    table.set_format(tfmt);
+    table.set_titles(row!["Nickname", "RSA", "ED", "Version", "ORPorts"]);
+    for r in relays {
+        if oneline {
+            table.add_row(row![
+                r.rs().nickname(),
+                r.rsa_id().to_string().to_uppercase(),
+                r.md().ed25519_id().to_string(),
+                get_version(r),
+                get_orports(r),
+            ]);
+        } else {
+            describe_relay(r)
+        }
+    }
+    if oneline {
+        table.printstd();
+    }
+}
+
+/// Unfortunately, the arti RouterFlags string parsing follows the torspec case
+/// sensitiveness and thus we have to remap them ourselves.
+pub fn parse_routerflag(f: &str) -> netstatus::RouterFlags {
+    match f.to_lowercase().as_str() {
+        "authority" => netstatus::RouterFlags::AUTHORITY,
+        "badexit" => netstatus::RouterFlags::BAD_EXIT,
+        "exit" => netstatus::RouterFlags::EXIT,
+        "fast" => netstatus::RouterFlags::FAST,
+        "guard" => netstatus::RouterFlags::GUARD,
+        "hsdir" => netstatus::RouterFlags::HSDIR,
+        "noedconsensus" => netstatus::RouterFlags::NO_ED_CONSENSUS,
+        "running" => netstatus::RouterFlags::RUNNING,
+        "stable" => netstatus::RouterFlags::STABLE,
+        "staledesc" => netstatus::RouterFlags::STALE_DESC,
+        "v2dir" => netstatus::RouterFlags::V2DIR,
+        "valid" => netstatus::RouterFlags::VALID,
+        _ => netstatus::RouterFlags::empty(),
+    }
+}

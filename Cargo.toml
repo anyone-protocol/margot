@@ -1,0 +1,31 @@
+[package]
+name = "margot"
+version = "0.1.0"
+authors = ["David Goulet <dgoulet@ev0ke.net>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = [ "tokio" ]
+tokio = [ "tor-client/tokio", "tor-rtcompat/tokio" ]
+
+[dependencies]
+config = { version="0.11.0", default-features=false }
+hex = { version = "0.4" }
+structopt = { version = "0.3" }
+thiserror = "1.0.24"
+simple-logging = "2.0.2"
+anyhow = "1.0.38"
+serde = { version = "1.0.124", features = ["derive"] }
+futures = "0.3"
+async-trait = "0.1"
+prettytable-rs = "0.8"
+ipnetwork = "0.17"
+
+tor-client = { path = "../arti/tor-client", version = "*", features = ["experimental-api"] }
+tor-config = { path = "../arti/tor-config", version = "*" }
+tor-dirmgr = { path = "../arti/tor-dirmgr", version = "*" }
+tor-netdir = { path = "../arti/tor-netdir", version = "*", features = ["experimental-api"] }
+tor-netdoc = { path = "../arti/tor-netdoc", version = "*" }
+tor-rtcompat = { path = "../arti/tor-rtcompat", version = "*" }
