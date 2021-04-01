@@ -1,3 +1,4 @@
+mod config;
 mod count;
 mod err;
 mod find;
@@ -31,6 +32,8 @@ impl<T: RunnableOffline + Send + Sync> Runnable for T {
 
 #[derive(StructOpt)]
 pub enum SubCommand {
+    #[structopt(name = "config", about = "Create configuration entries")]
+    Config(config::ConfigCommand),
     #[structopt(name = "count", about = "Count relay(s) in the consensus")]
     Count(count::CountCommand),
     #[structopt(name = "find", about = "Find relay(s) in the consensus")]
@@ -43,12 +46,13 @@ pub enum SubCommand {
 
 impl SubCommand {
     fn cmd(&self) -> Box<&(dyn Runnable + Send + Sync)> {
-        match self {
-            SubCommand::Count(c) => Box::new(c),
-            SubCommand::Find(c) => Box::new(c),
-            SubCommand::Sybil(c) => Box::new(c),
-            SubCommand::Test(c) => Box::new(c),
-        }
+        Box::new(match self {
+            SubCommand::Config(c) => c,
+            SubCommand::Count(c) => c,
+            SubCommand::Find(c) => c,
+            SubCommand::Sybil(c) => c,
+            SubCommand::Test(c) => c,
+        })
     }
 }
 
