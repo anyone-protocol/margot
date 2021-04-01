@@ -1,6 +1,7 @@
 use hex;
 use prettytable::format;
 use prettytable::Table;
+use std::fmt;
 use std::str::FromStr;
 
 use crate::commands::err::Error;
@@ -19,24 +20,39 @@ impl FromStr for RelayFingerprint {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let fp = match s.len() {
+        let fingerprint = s.to_string().replace("$", "");
+        let fp = match fingerprint.len() {
             40 => {
-                if hex::decode(s).is_err() {
+                if hex::decode(&fingerprint).is_err() {
                     return Err(Error::UndecodableFingerprint(s.to_string()));
                 }
-                RelayFingerprint::RSA(s.to_string())
+                RelayFingerprint::RSA(fingerprint)
             }
-            43 => RelayFingerprint::ED(s.to_string()),
+            43 => RelayFingerprint::ED(fingerprint),
             _ => return Err(Error::WrongFingerprintLength(s.to_string())),
         };
         Ok(fp)
     }
 }
 
+impl fmt::Display for RelayFingerprint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            RelayFingerprint::RSA(rsa) => rsa,
+            RelayFingerprint::ED(ed) => ed,
+        };
+        write!(f, "{}", s)
+    }
+}
+
 impl RelayFingerprint {
     pub fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
         match self {
-            RelayFingerprint::RSA(rsa) => rsa.to_lowercase() == relay.rsa_id().to_string(),
+            RelayFingerprint::RSA(rsa) => relay
+                .rsa_id()
+                .to_string()
+                .find(rsa.to_lowercase().as_str())
+                .is_some(),
             RelayFingerprint::ED(ed) => *ed == relay.id().to_string(),
         }
     }

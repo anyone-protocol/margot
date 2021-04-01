@@ -23,7 +23,9 @@ async-trait = "0.1"
 prettytable-rs = "0.8"
 ipnetwork = "0.17"
 multimap = "0.8"
+rand = "0.8"
 
+tor-circmgr = { path = "../arti/tor-circmgr", version = "*", features = ["experimental-api"] }
 tor-client = { path = "../arti/tor-client", version = "*", features = ["experimental-api"] }
 tor-config = { path = "../arti/tor-config", version = "*" }
 tor-dirmgr = { path = "../arti/tor-dirmgr", version = "*" }

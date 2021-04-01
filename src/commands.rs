@@ -2,6 +2,7 @@ mod count;
 mod err;
 mod find;
 mod sybil;
+mod test;
 mod util;
 
 use anyhow::Result;
@@ -36,6 +37,8 @@ pub enum SubCommand {
     Find(find::FindCommand),
     #[structopt(name = "sybil", about = "Sybil testing")]
     Sybil(sybil::SybilCommand),
+    #[structopt(name = "test", about = "Run test(s) on one or many relay(s)")]
+    Test(test::TestCommand),
 }
 
 impl SubCommand {
@@ -44,6 +47,7 @@ impl SubCommand {
             SubCommand::Count(c) => Box::new(c),
             SubCommand::Find(c) => Box::new(c),
             SubCommand::Sybil(c) => Box::new(c),
+            SubCommand::Test(c) => Box::new(c),
         }
     }
 }
