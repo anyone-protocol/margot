@@ -5,8 +5,6 @@ use thiserror::Error;
 /// An error originated by a command.
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Relay fingerprint not found: {0}")]
-    RelayNotFound(String),
     #[error("Invalid filter: {0}")]
     InvalidFilter(String),
     #[error("Undecodable fingerprint: {0}")]

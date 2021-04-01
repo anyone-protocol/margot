@@ -4,37 +4,47 @@ use rand::prelude::*;
 use std::fmt;
 use structopt::StructOpt;
 
-use crate::commands::err::Error;
-use crate::commands::util;
+use crate::commands::find;
 use crate::commands::Runnable;
 
 use tor_circmgr;
 
 #[derive(Debug, Clone, StructOpt)]
 pub struct ExtendCommand {
-    fingerprint: util::RelayFingerprint,
+    /// The filters of this command.
+    filters: Vec<find::FindFilter>,
 }
 
 impl ExtendCommand {
     async fn extend(&self, tor_client: &tor_client::TorClient) -> Result<()> {
+        let mut found: bool = false;
+        let find = find::FindCommand::new(&self.filters);
         let netdir = tor_client.dirmgr().netdir().await;
-        let relay = netdir
-            .relays()
-            .find(|r| self.fingerprint.match_relay(&r))
-            .ok_or(Error::RelayNotFound(self.fingerprint.to_string()))?;
+        let relays_iter = netdir.relays().filter(|r| find.match_relay(r));
 
-        let path = tor_circmgr::path::TorPath::OneHop(relay);
+        for relay in relays_iter {
+            found = true;
+            // We take a copy of the fingerprint and nickname for later
+            // printing because we loose ownership of the relay object once it
+            // is in the TorPath.
+            let fp = relay.rsa_id().to_string().replace("$", "").to_uppercase();
+            let nickname = relay.rs().nickname().to_string();
+            let path = tor_circmgr::path::TorPath::OneHop(relay);
 
-        let dirinfo: tor_circmgr::DirInfo = netdir.as_ref().into();
-        let mut rng = StdRng::from_rng(rand::thread_rng()).expect("Unable to build RNG");
-        let circ = tor_client
-            .circmgr()
-            .build_path(&mut rng, dirinfo, &path)
-            .await;
-        match circ {
-            Err(e) => println!("[-] Unable to extend: {}", e),
-            Ok(_) => println!("[+] Successful one hop to: {}", self.fingerprint),
-        };
+            let dirinfo: tor_circmgr::DirInfo = netdir.as_ref().into();
+            let mut rng = StdRng::from_rng(rand::thread_rng()).expect("Unable to build RNG");
+            let circ = tor_client
+                .circmgr()
+                .build_path(&mut rng, dirinfo, &path)
+                .await;
+            match circ {
+                Err(e) => println!("[-] Unable to extend: {}", e),
+                Ok(_) => println!("[+] Successful one hop to: {} - {}", nickname, fp),
+            };
+        }
+        if found == false {
+            println!("[-] No relays matching filters: {:?}", self.filters);
+        }
         Ok(())
     }
 }
