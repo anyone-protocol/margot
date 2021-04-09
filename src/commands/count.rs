@@ -29,7 +29,7 @@ impl RunnableOffline for CountCommand {
             let count = netdir.relays().filter(|r| filter.match_relay(r)).count();
             println!("[+] {} relays match: {:?}", count, filter);
             if self.list {
-                let find = find::FindCommand::new(&vec![filter.clone()]);
+                let find = find::FindCommand::new(&[filter.clone()]);
                 let relays = find.filter(netdir);
                 util::describe_relays(&relays, true, 4);
             }

@@ -1,4 +1,3 @@
-use hex;
 use prettytable::format;
 use prettytable::Table;
 use std::fmt;
@@ -10,10 +9,10 @@ use tor_netdoc::doc::netstatus;
 
 #[derive(Debug, Clone)]
 pub enum RelayFingerprint {
-    /// RSA identity fingerprint
-    RSA(String),
+    /// Rsa identity fingerprint
+    Rsa(String),
     /// ed25519 identity fingerprint
-    ED(String),
+    Ed(String),
 }
 
 impl FromStr for RelayFingerprint {
@@ -26,9 +25,9 @@ impl FromStr for RelayFingerprint {
                 if hex::decode(&fingerprint).is_err() {
                     return Err(Error::UndecodableFingerprint(s.to_string()));
                 }
-                RelayFingerprint::RSA(fingerprint)
+                RelayFingerprint::Rsa(fingerprint)
             }
-            43 => RelayFingerprint::ED(fingerprint),
+            43 => RelayFingerprint::Ed(fingerprint),
             _ => return Err(Error::WrongFingerprintLength(s.to_string())),
         };
         Ok(fp)
@@ -38,8 +37,8 @@ impl FromStr for RelayFingerprint {
 impl fmt::Display for RelayFingerprint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            RelayFingerprint::RSA(rsa) => rsa,
-            RelayFingerprint::ED(ed) => ed,
+            RelayFingerprint::Rsa(rsa) => rsa,
+            RelayFingerprint::Ed(ed) => ed,
         };
         write!(f, "{}", s)
     }
@@ -48,12 +47,11 @@ impl fmt::Display for RelayFingerprint {
 impl RelayFingerprint {
     pub fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
         match self {
-            RelayFingerprint::RSA(rsa) => relay
+            RelayFingerprint::Rsa(rsa) => relay
                 .rsa_id()
                 .to_string()
-                .find(rsa.to_lowercase().as_str())
-                .is_some(),
-            RelayFingerprint::ED(ed) => *ed == relay.id().to_string(),
+                .contains(rsa.to_lowercase().as_str()),
+            RelayFingerprint::Ed(ed) => *ed == relay.id().to_string(),
         }
     }
 }
@@ -77,7 +75,7 @@ fn get_orports(r: &tor_netdir::Relay) -> String {
 fn describe_relay(r: &tor_netdir::Relay) {
     println!("[+] Nickname: {}", r.rs().nickname());
     println!(
-        "  > Fingerprint: RSA: {}, ED: {}",
+        "  > Fingerprint: Rsa: {}, Ed: {}",
         r.rsa_id().to_string().to_uppercase(),
         r.md().ed25519_id().to_string()
     );
@@ -98,7 +96,7 @@ fn describe_relay(r: &tor_netdir::Relay) {
     );
 }
 
-pub fn describe_relays(relays: &Vec<tor_netdir::Relay>, oneline: bool, indent: usize) {
+pub fn describe_relays(relays: &[tor_netdir::Relay], oneline: bool, indent: usize) {
     let tfmt = format::FormatBuilder::new()
         .column_separator('|')
         .borders('|')
@@ -116,7 +114,7 @@ pub fn describe_relays(relays: &Vec<tor_netdir::Relay>, oneline: bool, indent: u
         .build();
     let mut table = Table::new();
     table.set_format(tfmt);
-    table.set_titles(row!["Nickname", "RSA", "ED", "Version", "ORPorts"]);
+    table.set_titles(row!["Nickname", "Rsa", "Ed", "Version", "ORPorts"]);
     for r in relays {
         if oneline {
             table.add_row(row![

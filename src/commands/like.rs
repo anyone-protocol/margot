@@ -7,8 +7,6 @@ use structopt::StructOpt;
 
 use crate::commands::RunnableOffline;
 
-use tor_netdir;
-
 #[derive(StructOpt)]
 pub struct LikeCommand {
     name: String,
@@ -38,8 +36,8 @@ impl RunnableOffline for LikeCommand {
         println!("[+] Top 5 closest nicknames to: {}", self.name);
         let mut d_vec: Vec<(&String, &usize)> = distances.iter().collect();
         d_vec.sort_by(|a, b| a.1.cmp(b.1));
-        for i in 0..5 {
-            println!(" -> {}: {}", d_vec[i].0, d_vec[i].1);
+        for item in d_vec.iter().take(5) {
+            println!(" -> {}: {}", item.0, item.1);
         }
         Ok(())
     }

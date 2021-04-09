@@ -11,9 +11,6 @@ use anyhow::Result;
 use async_trait::async_trait;
 use structopt::StructOpt;
 
-use tor_client;
-use tor_netdir;
-
 #[async_trait]
 pub trait Runnable {
     async fn run(&self, tor_client: &tor_client::TorClient) -> Result<()>;
@@ -48,15 +45,15 @@ pub enum SubCommand {
 }
 
 impl SubCommand {
-    fn cmd(&self) -> Box<&(dyn Runnable + Send + Sync)> {
-        Box::new(match self {
+    fn cmd(&self) -> &(dyn Runnable + Send + Sync) {
+        match self {
             SubCommand::Config(c) => c,
             SubCommand::Count(c) => c,
             SubCommand::Find(c) => c,
             SubCommand::Like(c) => c,
             SubCommand::Sybil(c) => c,
             SubCommand::Test(c) => c,
-        })
+        }
     }
 }
 

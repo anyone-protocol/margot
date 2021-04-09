@@ -63,14 +63,14 @@ impl BadCommand {
 
     fn print_header(&self, fname: &str) {
         println!("[+] Rules for {}:", fname);
-        println!("");
+        println!();
         println!("-----");
         println!("{}", self.comment());
     }
 
     fn print_footer(&self) {
         println!("-----");
-        println!("");
+        println!();
     }
 
     fn print_rules<F>(
@@ -78,7 +78,7 @@ impl BadCommand {
         prefix: &str,
         fname: &str,
         fmt_fn: F,
-        relays: &Vec<tor_netdir::Relay<'_>>,
+        relays: &[tor_netdir::Relay<'_>],
     ) where
         F: Fn(&str, &tor_netdir::Relay<'_>) -> String,
     {

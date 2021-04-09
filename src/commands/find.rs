@@ -9,7 +9,6 @@ use crate::commands::err::Error;
 use crate::commands::util;
 use crate::commands::RunnableOffline;
 
-use tor_netdir;
 use tor_netdoc::doc::netstatus;
 
 #[derive(Debug, Clone)]
@@ -47,16 +46,14 @@ impl FindFilter {
             Filter::Address(a) => relay
                 .rs()
                 .orport_addrs()
-                .find(|addr| a.contains(addr.ip()))
-                .is_some(),
+                .any(|addr| a.contains(addr.ip())),
             Filter::Nickname(n) => relay.rs().nickname().contains(n),
             Filter::Fingerprint(fp) => fp.match_relay(relay),
             Filter::Flags(f) => relay.rs().flags().contains(*f),
             Filter::Port(p) => relay
                 .rs()
                 .orport_addrs()
-                .find(|addr| addr.port() == *p)
-                .is_some(),
+                .any(|addr| addr.port() == *p),
             Filter::Version(v) => relay
                 .rs()
                 .version()
@@ -78,7 +75,7 @@ pub struct FindCommand {
 }
 
 impl FindCommand {
-    pub fn new(filters: &Vec<FindFilter>) -> Self {
+    pub fn new(filters: &[FindFilter]) -> Self {
         FindCommand {
             oneline: false,
             filters: filters.to_vec(),
@@ -113,7 +110,7 @@ impl FromStr for FindFilter {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let exclude = s.find("-:").is_some();
+        let exclude = s.contains("-:");
         if let Some(kv) = s.to_string().replace("-", "").split_once(':') {
             let filter = match kv.0 {
                 "a" | "addr" => Filter::Address(kv.1.parse().unwrap()),
@@ -126,7 +123,7 @@ impl FromStr for FindFilter {
             };
             return Ok(FindFilter::new(exclude, filter));
         }
-        return Err(Error::InvalidFilter(s.to_string()));
+        Err(Error::InvalidFilter(s.to_string()))
     }
 }
 

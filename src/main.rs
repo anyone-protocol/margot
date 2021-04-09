@@ -11,9 +11,6 @@ use structopt::StructOpt;
 #[macro_use]
 extern crate prettytable;
 
-use tor_client;
-use tor_dirmgr;
-
 async fn handle_command(opts: &opts::Opts) -> Result<()> {
     let mut builder = tor_dirmgr::NetDirConfigBuilder::new();
     builder.use_default_cache_path()?;

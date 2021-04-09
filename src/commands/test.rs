@@ -7,8 +7,6 @@ use structopt::StructOpt;
 use crate::commands::find;
 use crate::commands::Runnable;
 
-use tor_circmgr;
-
 #[derive(Debug, Clone, StructOpt)]
 pub struct ExtendCommand {
     /// The filters of this command.
@@ -42,7 +40,7 @@ impl ExtendCommand {
                 Ok(_) => println!("[+] Successful one hop to: {} - {}", nickname, fp),
             };
         }
-        if found == false {
+        if !found {
             println!("[-] No relays matching filters: {:?}", self.filters);
         }
         Ok(())
@@ -70,8 +68,9 @@ impl fmt::Display for TestCommand {
 #[async_trait]
 impl Runnable for TestCommand {
     async fn run(&self, tor_client: &tor_client::TorClient) -> Result<()> {
-        Ok(match &self.subcommand {
+        match &self.subcommand {
             TestSubCommand::Extend(c) => c.extend(tor_client).await?,
-        })
+        };
+        Ok(())
     }
 }
