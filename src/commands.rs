@@ -2,6 +2,7 @@ mod config;
 mod count;
 mod err;
 mod find;
+mod like;
 mod sybil;
 mod test;
 mod util;
@@ -25,7 +26,7 @@ pub trait RunnableOffline {
 #[async_trait]
 impl<T: RunnableOffline + Send + Sync> Runnable for T {
     async fn run(&self, tor_client: &tor_client::TorClient) -> Result<()> {
-        let netdir = tor_client.dirmgr().netdir().await;
+        let netdir = tor_client.dirmgr().netdir();
         self.run(&netdir)
     }
 }
@@ -38,6 +39,8 @@ pub enum SubCommand {
     Count(count::CountCommand),
     #[structopt(name = "find", about = "Find relay(s) in the consensus")]
     Find(find::FindCommand),
+    #[structopt(name = "like", about = "Match alike relay(s) in the consensus")]
+    Like(like::LikeCommand),
     #[structopt(name = "sybil", about = "Sybil testing")]
     Sybil(sybil::SybilCommand),
     #[structopt(name = "test", about = "Run test(s) on one or many relay(s)")]
@@ -50,6 +53,7 @@ impl SubCommand {
             SubCommand::Config(c) => c,
             SubCommand::Count(c) => c,
             SubCommand::Find(c) => c,
+            SubCommand::Like(c) => c,
             SubCommand::Sybil(c) => c,
             SubCommand::Test(c) => c,
         })

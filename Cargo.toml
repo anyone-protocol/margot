@@ -24,6 +24,7 @@ prettytable-rs = "0.8"
 ipnetwork = "0.17"
 multimap = "0.8"
 rand = "0.8"
+levenshtein = "1.0.5"
 
 tor-circmgr = { path = "../arti/tor-circmgr", version = "*", features = ["experimental-api"] }
 tor-client = { path = "../arti/tor-client", version = "*", features = ["experimental-api"] }

@@ -19,7 +19,7 @@ impl ExtendCommand {
     async fn extend(&self, tor_client: &tor_client::TorClient) -> Result<()> {
         let mut found: bool = false;
         let find = find::FindCommand::new(&self.filters);
-        let netdir = tor_client.dirmgr().netdir().await;
+        let netdir = tor_client.dirmgr().netdir();
         let relays_iter = netdir.relays().filter(|r| find.match_relay(r));
 
         for relay in relays_iter {
