@@ -4,6 +4,8 @@ use rand::prelude::*;
 use std::fmt;
 use structopt::StructOpt;
 
+use tor_rtcompat::Runtime;
+
 use crate::commands::find;
 use crate::commands::Runnable;
 
@@ -14,7 +16,7 @@ pub struct ExtendCommand {
 }
 
 impl ExtendCommand {
-    async fn extend(&self, tor_client: &tor_client::TorClient) -> Result<()> {
+    async fn extend<R:Runtime>(&self, tor_client: &tor_client::TorClient<R>) -> Result<()> {
         let mut found: bool = false;
         let find = find::FindCommand::new(&self.filters);
         let netdir = tor_client.dirmgr().netdir();
@@ -66,8 +68,8 @@ impl fmt::Display for TestCommand {
 }
 
 #[async_trait]
-impl Runnable for TestCommand {
-    async fn run(&self, tor_client: &tor_client::TorClient) -> Result<()> {
+impl<R:Runtime> Runnable<R> for TestCommand {
+    async fn run(&self, tor_client: &tor_client::TorClient<R>) -> Result<()> {
         match &self.subcommand {
             TestSubCommand::Extend(c) => c.extend(tor_client).await?,
         };
