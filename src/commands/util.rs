@@ -133,22 +133,22 @@ pub fn describe_relays(relays: &[tor_netdir::Relay], oneline: bool, indent: usiz
     }
 }
 
-/// Unfortunately, the arti RouterFlags string parsing follows the torspec case
+/// Unfortunately, the arti RelayFlags string parsing follows the torspec case
 /// sensitiveness and thus we have to remap them ourselves.
-pub fn parse_routerflag(f: &str) -> netstatus::RouterFlags {
+pub fn parse_routerflag(f: &str) -> netstatus::RelayFlags {
     match f.to_lowercase().as_str() {
-        "authority" => netstatus::RouterFlags::AUTHORITY,
-        "badexit" => netstatus::RouterFlags::BAD_EXIT,
-        "exit" => netstatus::RouterFlags::EXIT,
-        "fast" => netstatus::RouterFlags::FAST,
-        "guard" => netstatus::RouterFlags::GUARD,
-        "hsdir" => netstatus::RouterFlags::HSDIR,
-        "noedconsensus" => netstatus::RouterFlags::NO_ED_CONSENSUS,
-        "running" => netstatus::RouterFlags::RUNNING,
-        "stable" => netstatus::RouterFlags::STABLE,
-        "staledesc" => netstatus::RouterFlags::STALE_DESC,
-        "v2dir" => netstatus::RouterFlags::V2DIR,
-        "valid" => netstatus::RouterFlags::VALID,
-        _ => netstatus::RouterFlags::empty(),
+        "authority" => netstatus::RelayFlags::AUTHORITY,
+        "badexit" => netstatus::RelayFlags::BAD_EXIT,
+        "exit" => netstatus::RelayFlags::EXIT,
+        "fast" => netstatus::RelayFlags::FAST,
+        "guard" => netstatus::RelayFlags::GUARD,
+        "hsdir" => netstatus::RelayFlags::HSDIR,
+        "noedconsensus" => netstatus::RelayFlags::NO_ED_CONSENSUS,
+        "running" => netstatus::RelayFlags::RUNNING,
+        "stable" => netstatus::RelayFlags::STABLE,
+        "staledesc" => netstatus::RelayFlags::STALE_DESC,
+        "v2dir" => netstatus::RelayFlags::V2DIR,
+        "valid" => netstatus::RelayFlags::VALID,
+        _ => netstatus::RelayFlags::empty(),
     }
 }

@@ -14,9 +14,9 @@ use structopt::StructOpt;
 extern crate prettytable;
 
 async fn handle_command<R: Runtime>(runtime: &R, opts: &opts::Opts) -> Result<()> {
-    let mut builder = tor_dirmgr::NetDirConfigBuilder::new();
+    let mut builder = tor_dirmgr::DirMgrConfigBuilder::new();
     builder.use_default_cache_path()?;
-    let config: tor_dirmgr::NetDirConfig = builder.finalize()?;
+    let config: tor_dirmgr::DirMgrConfig = builder.build()?;
 
     let tor_client = Arc::new(tor_client::TorClient::bootstrap(runtime.clone(), config).await?);
 

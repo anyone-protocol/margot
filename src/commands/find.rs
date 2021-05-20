@@ -18,7 +18,7 @@ pub enum Filter {
     /// Relay fingerprint
     Fingerprint(util::RelayFingerprint),
     /// Relay flags,
-    Flags(netstatus::RouterFlags),
+    Flags(netstatus::RelayFlags),
     /// Relay nickname
     Nickname(String),
     /// ORPort
