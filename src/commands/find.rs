@@ -58,7 +58,8 @@ impl FindFilter {
                 .rs()
                 .version()
                 .as_ref()
-                .unwrap_or(&"".to_string())
+                .expect("version error")
+                .to_string()
                 .contains(v),
         };
         ret ^= self.exclude;

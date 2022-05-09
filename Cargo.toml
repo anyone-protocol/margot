@@ -8,7 +8,7 @@ edition = "2018"
 
 [features]
 default = [ "tokio" ]
-tokio = [ "tor-client/tokio", "tor-rtcompat/tokio" ]
+tokio = [ "tor-rtcompat/tokio" ]
 
 [dependencies]
 config = { version="0.11.0", default-features=false }
@@ -25,11 +25,33 @@ ipnetwork = "0.17"
 multimap = "0.8"
 rand = "0.8"
 levenshtein = "1.0.5"
+tokio-crate = { package = "tokio", version = "1.7", features = [
+    "rt",
+    "rt-multi-thread",
+    "io-util",
+    "net",
+    "time",
+    "macros",
+] }
 
-tor-circmgr = { path = "../arti/tor-circmgr", version = "*", features = ["experimental-api"] }
-tor-client = { path = "../arti/tor-client", version = "*", features = ["experimental-api"] }
-tor-config = { path = "../arti/tor-config", version = "*" }
-tor-dirmgr = { path = "../arti/tor-dirmgr", version = "*" }
-tor-netdir = { path = "../arti/tor-netdir", version = "*", features = ["experimental-api"] }
-tor-netdoc = { path = "../arti/tor-netdoc", version = "*" }
-tor-rtcompat = { path = "../arti/tor-rtcompat", version = "*" }
+# # Last versions as of 2022-09-22, increment them as they change.
+# arti-client = {version = "0.6", features = ["experimental-api"]}
+# tor-rtcompat = {version = "0.6", features = ["tokio"]}
+# tor-chanmgr = {version = "0.6"}
+# tor-circmgr = {version = "0.5", features = ["experimental-api"] }
+# tor-config = {version = "0.6" }
+# tor-dirmgr = {version = "0.7" }
+# tor-netdir = {version = "0.6", features = ["experimental-api"] }
+# tor-netdoc = {version = "0.5" }
+# tor-proto = {version = "0.6" }
+
+# until there's a release with https://gitlab.torproject.org/tpo/core/arti/-/merge_requests/738
+arti-client = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*", features = ["experimental-api"]}
+tor-rtcompat = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*", features = ["tokio"]}
+tor-chanmgr = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
+tor-circmgr = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*", features = ["experimental-api"]}
+tor-config = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
+tor-dirmgr = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
+tor-netdir = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*", features = ["experimental-api"]}
+tor-netdoc = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
+tor-proto = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}

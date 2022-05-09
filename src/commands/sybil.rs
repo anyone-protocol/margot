@@ -102,6 +102,7 @@ impl RunnableOffline for SybilCommand {
             if values.len() != 1 {
                 continue;
             }
+            // This panics
             if self.match_policy_and_more(&policy, &REDUCED_EXIT_POLICY_DEFAULT) {
                 println!("[+] Matching Reduced Exit Policy and More: '{}'", policy);
                 util::describe_relays(&values, true, 4);

@@ -13,8 +13,8 @@ use structopt::StructOpt;
 use tor_rtcompat::Runtime;
 
 #[async_trait]
-pub trait Runnable<R:Runtime> {
-    async fn run(&self, tor_client: &tor_client::TorClient<R>) -> Result<()>;
+pub trait Runnable<R: Runtime> {
+    async fn run(&self, arti_client: &arti_client::TorClient<R>) -> Result<()>;
 }
 
 pub trait RunnableOffline {
@@ -22,9 +22,9 @@ pub trait RunnableOffline {
 }
 
 #[async_trait]
-impl<T: RunnableOffline + Send + Sync,R:Runtime> Runnable<R> for T {
-    async fn run(&self, tor_client: &tor_client::TorClient<R>) -> Result<()> {
-        let netdir = tor_client.dirmgr().netdir();
+impl<T: RunnableOffline + Send + Sync, R: Runtime> Runnable<R> for T {
+    async fn run(&self, arti_client: &arti_client::TorClient<R>) -> Result<()> {
+        let netdir = arti_client.dirmgr().timely_netdir()?;
         self.run(&netdir)
     }
 }
@@ -46,7 +46,7 @@ pub enum SubCommand {
 }
 
 impl SubCommand {
-    fn cmd<R:Runtime>(&self) -> &(dyn Runnable<R> + Send + Sync) {
+    fn cmd<R: Runtime>(&self) -> &(dyn Runnable<R> + Send + Sync) {
         match self {
             SubCommand::Config(c) => c,
             SubCommand::Count(c) => c,
@@ -59,8 +59,8 @@ impl SubCommand {
 }
 
 #[async_trait]
-impl<R:Runtime> Runnable<R> for SubCommand {
-    async fn run(&self, tor_client: &tor_client::TorClient<R>) -> Result<()> {
-        self.cmd().run(tor_client).await
+impl<R: Runtime> Runnable<R> for SubCommand {
+    async fn run(&self, arti_client: &arti_client::TorClient<R>) -> Result<()> {
+        self.cmd().run(arti_client).await
     }
 }

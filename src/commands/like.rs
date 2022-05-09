@@ -31,7 +31,10 @@ impl RunnableOffline for LikeCommand {
             if (count % 1000) == 0 {
                 println!(" :: {} relays processed", count);
             }
-            distances.insert(relay.rsa_id().to_string(), levenshtein(&self.name.as_str(), relay.rs().nickname().as_str()));
+            distances.insert(
+                relay.rsa_id().to_string(),
+                levenshtein(&self.name.as_str(), relay.rs().nickname()),
+            );
         }
         println!("[+] Top 5 closest nicknames to: {}", self.name);
         let mut d_vec: Vec<(&String, &usize)> = distances.iter().collect();

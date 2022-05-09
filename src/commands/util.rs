@@ -57,11 +57,12 @@ impl RelayFingerprint {
 }
 
 fn get_version(r: &tor_netdir::Relay) -> String {
+    // Can't `unwrap_or` cause can't create `Version` data type
     r.rs()
         .version()
         .as_ref()
-        .unwrap_or(&"<Unknown>".to_string())
-        .clone()
+        .expect("version error")
+        .to_string()
 }
 
 fn get_orports(r: &tor_netdir::Relay) -> String {

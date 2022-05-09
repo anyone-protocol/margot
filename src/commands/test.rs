@@ -1,9 +1,10 @@
 use anyhow::Result;
 use async_trait::async_trait;
-use rand::prelude::*;
 use std::fmt;
 use structopt::StructOpt;
 
+use tor_chanmgr::ChannelUsage;
+use tor_proto::circuit::CircParameters;
 use tor_rtcompat::Runtime;
 
 use crate::commands::find;
@@ -16,10 +17,10 @@ pub struct ExtendCommand {
 }
 
 impl ExtendCommand {
-    async fn extend<R:Runtime>(&self, tor_client: &tor_client::TorClient<R>) -> Result<()> {
+    async fn extend<R: Runtime>(&self, arti_client: &arti_client::TorClient<R>) -> Result<()> {
         let mut found: bool = false;
         let find = find::FindCommand::new(&self.filters);
-        let netdir = tor_client.dirmgr().netdir();
+        let netdir = arti_client.dirmgr().timely_netdir().unwrap();
         let relays_iter = netdir.relays().filter(|r| find.match_relay(r));
 
         for relay in relays_iter {
@@ -29,14 +30,15 @@ impl ExtendCommand {
             // is in the TorPath.
             let fp = relay.rsa_id().to_string().replace("$", "").to_uppercase();
             let nickname = relay.rs().nickname().to_string();
-            let path = tor_circmgr::path::TorPath::OneHop(relay);
-
-            let dirinfo: tor_circmgr::DirInfo = netdir.as_ref().into();
-            let mut rng = StdRng::from_rng(rand::thread_rng()).expect("Unable to build RNG");
-            let circ = tor_client
+            let path = tor_circmgr::path::TorPath::new_one_hop(relay);
+            let params = CircParameters::default();
+            let usage = ChannelUsage::UselessCircuit;
+            let circ = arti_client
                 .circmgr()
-                .build_path(&mut rng, dirinfo, &path)
+                .builder()
+                .build(&path, &params, usage)
                 .await;
+
             match circ {
                 Err(e) => println!("[-] Unable to extend: {}", e),
                 Ok(_) => println!("[+] Successful one hop to: {} - {}", nickname, fp),
@@ -68,10 +70,10 @@ impl fmt::Display for TestCommand {
 }
 
 #[async_trait]
-impl<R:Runtime> Runnable<R> for TestCommand {
-    async fn run(&self, tor_client: &tor_client::TorClient<R>) -> Result<()> {
+impl<R: Runtime> Runnable<R> for TestCommand {
+    async fn run(&self, arti_client: &arti_client::TorClient<R>) -> Result<()> {
         match &self.subcommand {
-            TestSubCommand::Extend(c) => c.extend(tor_client).await?,
+            TestSubCommand::Extend(c) => c.extend(arti_client).await?,
         };
         Ok(())
     }
