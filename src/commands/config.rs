@@ -10,7 +10,7 @@ static GITLAB_BUG_URL: &str =
     "https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues";
 
 static REJECT_TOKENS: (&str, &str) = ("AuthDirReject", "!reject");
-static BADEXIT_TOKENS: (&str, &str) = ("AuthBadExit", "!badexit");
+static BADEXIT_TOKENS: (&str, &str) = ("AuthDirBadExit", "!badexit");
 
 #[derive(Debug, Clone, StructOpt)]
 pub struct BadCommand {
