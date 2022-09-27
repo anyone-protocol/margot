@@ -59,7 +59,7 @@ Note: part of this section should probably be moved into code documentation.
 
       -----
       # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthBadExit 206.55.74.0
+      AuthDirBadExit 206.55.74.0
       [...]
       -----
 
@@ -82,7 +82,7 @@ Note: part of this section should probably be moved into code documentation.
 
       -----
       # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthBadExit 24.203.134.20
+      AuthDirBadExit 24.203.134.20
       -----
 
       [+] Rules for approved-routers.conf:
@@ -103,7 +103,7 @@ Note: part of this section should probably be moved into code documentation.
 
       -----
       # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthBadExit 24.203.134.20
+      AuthDirBadExit 24.203.134.20
       -----
 
       [+] Rules for approved-routers.conf:
@@ -143,7 +143,7 @@ Note: part of this section should probably be moved into code documentation.
 
       -----
       # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthBadExit 24.203.134.20
+      AuthDirBadExit 24.203.134.20
       -----
 
       [+] Rules for approved-routers.conf:
@@ -164,10 +164,10 @@ Note: part of this section should probably be moved into code documentation.
 
       -----
       # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthBadExit 65.109.16.131
-      AuthBadExit 104.200.30.152
-      AuthBadExit 2600:3c03::f03c:93ff:fecc:2d20
-      AuthBadExit 155.248.213.203
+      AuthDirBadExit 65.109.16.131
+      AuthDirBadExit 104.200.30.152
+      AuthDirBadExit 2600:3c03::f03c:93ff:fecc:2d20
+      AuthDirBadExit 155.248.213.203
       -----
 
       [+] Rules for approved-routers.conf:
@@ -206,7 +206,7 @@ Note: part of this section should probably be moved into code documentation.
     a ticket number (in `bad-relay-reports` repo) and optionally some filters.
 
     It works as the previous command except that:
-    - instead of generating rules for `bad.conf` like `AuthBadExit <addr>`,
+    - instead of generating rules for `bad.conf` like `AuthDirBadExit <addr>`,
       it generates rules like `AuthDirReject`.
     - instead of generating rules for `approved-routers.conf` like
       `!badexit <fp>`, it generates rules like `!reject <fp>`.
