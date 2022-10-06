@@ -34,24 +34,14 @@ tokio-crate = { package = "tokio", version = "1.7", features = [
     "macros",
 ] }
 
-# # Last versions as of 2022-09-22, increment them as they change.
-# arti-client = {version = "0.6", features = ["experimental-api"]}
-# tor-rtcompat = {version = "0.6", features = ["tokio"]}
-# tor-chanmgr = {version = "0.6"}
-# tor-circmgr = {version = "0.5", features = ["experimental-api"] }
-# tor-config = {version = "0.6" }
-# tor-dirmgr = {version = "0.7" }
-# tor-netdir = {version = "0.6", features = ["experimental-api"] }
-# tor-netdoc = {version = "0.5" }
-# tor-proto = {version = "0.6" }
-
-# until there's a release with https://gitlab.torproject.org/tpo/core/arti/-/merge_requests/738
-arti-client = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*", features = ["experimental-api"]}
-tor-rtcompat = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*", features = ["tokio"]}
-tor-chanmgr = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
-tor-circmgr = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*", features = ["experimental-api"]}
-tor-config = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
-tor-dirmgr = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
-tor-netdir = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*", features = ["experimental-api"]}
-tor-netdoc = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
-tor-proto = {git = "https://gitlab.torproject.org/tpo/core/arti.git", version = "*"}
+# Last versions as of 2022-10-06, increment them as they change.
+# Arti 1.0.1: https://gitlab.torproject.org/tpo/core/arti/-/tags/arti-v1.0.1
+arti-client = {version = "0.7", features = ["experimental-api"]}
+tor-rtcompat = {version = "0.7", features = ["tokio"]}
+tor-chanmgr = {version = "0.7"}
+tor-circmgr = {version = "0.6", features = ["experimental-api"] }
+tor-config = {version = "0.6" }
+tor-dirmgr = {version = "0.8" }
+tor-netdir = {version = "0.6", features = ["experimental-api"] }
+tor-netdoc = {version = "0.5" }
+tor-proto = {version = "0.7" }
