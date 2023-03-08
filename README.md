@@ -301,9 +301,21 @@ Note: part of this section should probably be moved into code documentation.
 
 - `sybil`: `Sybil testing`
   - `exitpolicy`: `Inspect Exit Policies`
-    - Matching Reduced Exit Policy and More:
+    - Matching Reduced Exit Policy and More
     - Not matching Reduced Exit Policy
-    Currently `match_policy_and_more` panics (see #3).
+
+    eg:
+    `sybil exitpolicy`, output:
+
+    ```bash
+    [+] Matching Reduced Exit Policy and More: 'accept 1-24,26-118,120-134,140-444,446-1213,1215-65535'
+    +-----------+-------------------------------------------+---------------------------------------------+----------+---------------------+
+    | Nickname  | Rsa                                       | Ed                                          | Version  | ORPorts             |
+    +-----------+-------------------------------------------+---------------------------------------------+----------+---------------------+
+    | SkyLights | $B0E93B10BD817250A818ABF7F5C2444AF364DD67 | oaLl3WmRC+4mKCNAvl4q+ghBwxkBvPgpcnAmP5NrABo | 0.4.7.10 | 173.237.206.68:9001 |
+    +-----------+-------------------------------------------+---------------------------------------------+----------+---------------------+
+    ```
+
 - `test`: `Run test(s) on one or many relay(s)`
   - `extend <filters>`: Circuit `Extend to a relay`, optionally matching
     some `filter`s.

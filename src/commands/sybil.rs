@@ -9,6 +9,10 @@ use crate::commands::RunnableOffline;
 
 use tor_netdoc::types::policy::PortPolicy;
 
+/// From <https://gitlab.torproject.org/legacy/trac/-/wikis/doc/ReducedExitPolicy>:
+/// The Reduced Exit Policy is an alternative to the default exit policy.
+/// It allows as many Internet services as possible while still blocking
+/// the majority of TCP ports.
 static REDUCED_EXIT_POLICY_DEFAULT: [u16; 102] = [
     20, 21, 22, 23, 43, 53, 79, 80, 81, 88, 110, 143, 194, 220, 389, 443, 464, 465, 531, 543, 544,
     554, 563, 587, 636, 706, 749, 853, 873, 902, 903, 904, 981, 989, 990, 991, 992, 993, 994, 995,
@@ -60,6 +64,8 @@ impl fmt::Display for SybilCommand {
 }
 
 impl SybilCommand {
+    /// If the relay's policy allows the same number of ports as the reduced
+    /// policy, return true, otherwise return false.
     fn match_policy(&self, policy: &PortPolicy, reduced: &'static [u16]) -> bool {
         if reduced.iter().filter(|p| policy.allows_port(**p)).count() == reduced.len() {
             return true;
@@ -67,6 +73,8 @@ impl SybilCommand {
         false
     }
 
+    /// If the relay's policy does not allow any of the reduced policy ports,
+    /// return true, otherwise return false.
     fn match_policy_empty(&self, policy: &PortPolicy, reduced: &'static [u16]) -> bool {
         if reduced.iter().filter(|p| policy.allows_port(**p)).count() == 0 {
             return true;
@@ -74,12 +82,15 @@ impl SybilCommand {
         false
     }
 
+    /// If the relay's policy allows the same number of ports as the reduced
+    /// policy and the total number of allowed ports is greater than the
+    /// reduced policy, return true, otherwise return false.
     fn match_policy_and_more(&self, policy: &PortPolicy, reduced: &'static [u16]) -> bool {
         // Yeah ugly but we don't have a way to know how many ports are
         // allowed for a PortPolicy object.
-        let num_allowed_port = (1..)
-            .take(u16::MAX.into())
-            .filter(|v| policy.allows_port(*v))
+        let num_allowed_port = (0..u16::MAX).collect::<Vec<u16>>()  // 65535
+            .iter()
+            .filter(|p| policy.allows_port(**p))
             .count();
 
         if self.match_policy(policy, reduced) && num_allowed_port > reduced.len() {
@@ -102,7 +113,6 @@ impl RunnableOffline for SybilCommand {
             if values.len() != 1 {
                 continue;
             }
-            // This panics
             if self.match_policy_and_more(&policy, &REDUCED_EXIT_POLICY_DEFAULT) {
                 println!("[+] Matching Reduced Exit Policy and More: '{}'", policy);
                 util::describe_relays(&values, true, 4);
