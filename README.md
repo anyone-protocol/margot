@@ -243,8 +243,6 @@ Note: part of this section should probably be moved into code documentation.
 
   Filters are written as in the previous subcommands.
 
-  Note: `count --help` prints `<filters>...`, should it print `[filters]`?
-
   eg:
   - `count fl:EXIT`, output:
 
@@ -321,8 +319,6 @@ Note: part of this section should probably be moved into code documentation.
     some `filter`s.
 
     Filters are written as in the previous subcommands.
-
-    Note: `test extend --help` prints `<filters>...`, should it print `[filters]`?
 
     Possible outputs:
     - `Unable to extend: <relay>`
