@@ -113,12 +113,12 @@ impl RunnableOffline for SybilCommand {
             if values.len() != 1 {
                 continue;
             }
-            if self.match_policy_and_more(&policy, &REDUCED_EXIT_POLICY_DEFAULT) {
+            if self.match_policy_and_more(policy, &REDUCED_EXIT_POLICY_DEFAULT) {
                 println!("[+] Matching Reduced Exit Policy and More: '{}'", policy);
-                util::describe_relays(&values, true, 4);
-            } else if self.match_policy_empty(&policy, &REDUCED_EXIT_POLICY_DEFAULT) {
+                util::describe_relays(values, true, 4);
+            } else if self.match_policy_empty(policy, &REDUCED_EXIT_POLICY_DEFAULT) {
                 println!("[+] Not matching Reduced Exit Policy: '{}'", policy);
-                util::describe_relays(&values, true, 4);
+                util::describe_relays(values, true, 4);
             }
         }
 
