@@ -78,7 +78,7 @@ fn describe_relay(r: &tor_netdir::Relay) {
     println!(
         "  > Fingerprint: Rsa: {}, Ed: {}",
         r.rsa_id().to_string().to_uppercase(),
-        r.md().ed25519_id().to_string()
+        r.md().ed25519_id()
     );
     println!("  > Flags: {:?}", r.rs().flags());
     println!("  > Weight: {:?}", r.rs().weight());
