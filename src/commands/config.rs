@@ -46,7 +46,7 @@ fn fmt_fp_rule(prefix: &str, relay: &tor_netdir::Relay<'_>) -> String {
     format!(
         "{} {}",
         prefix,
-        relay.rsa_id().to_string().replace("$", "").to_uppercase()
+        relay.rsa_id().to_string().replace('$', "").to_uppercase()
     )
 }
 

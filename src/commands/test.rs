@@ -28,7 +28,7 @@ impl ExtendCommand {
             // We take a copy of the fingerprint and nickname for later
             // printing because we loose ownership of the relay object once it
             // is in the TorPath.
-            let fp = relay.rsa_id().to_string().replace("$", "").to_uppercase();
+            let fp = relay.rsa_id().to_string().replace('$', "").to_uppercase();
             let nickname = relay.rs().nickname().to_string();
             let path = tor_circmgr::path::TorPath::new_one_hop(relay);
             let params = CircParameters::default();

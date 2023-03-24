@@ -112,7 +112,7 @@ impl FromStr for FindFilter {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let exclude = s.contains("-:");
-        if let Some(kv) = s.to_string().replace("-", "").split_once(':') {
+        if let Some(kv) = s.to_string().replace('-', "").split_once(':') {
             let filter = match kv.0 {
                 "a" | "addr" => Filter::Address(kv.1.parse().unwrap()),
                 "fl" | "flag" => Filter::Flags(util::parse_routerflag(kv.1)),
