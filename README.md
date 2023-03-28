@@ -20,7 +20,7 @@ Note: part of this section should probably be moved into code documentation.
     - `fp:<fingprint`
     - `p:<port>`
     - `v:<tor version>`
-    A filter can be `exclude` (boolean), ie. not matching a filter, whith the
+    A filter can be `exclude` (boolean), ie. not matching a filter, with the
     form `-:`, eg: `fl-:BADEXIT`
 
     Several `filter`s can be written one after another separated by an space.
@@ -136,7 +136,7 @@ Note: part of this section should probably be moved into code documentation.
 
       ```
 
-    - `config badexit 25 n:nestor00patof`, ouput:
+    - `config badexit 25 n:nestor00patof`, output:
 
       ```bash
       [+] Rules for bad.conf:
