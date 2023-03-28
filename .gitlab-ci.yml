@@ -1,0 +1,35 @@
+cache:
+  paths:
+    - cargo/
+
+variables:
+  CARGO_HOME: $CI_PROJECT_DIR/cargo
+
+image: "rust:latest"
+
+before_script:
+  - rustup component add rustfmt
+  - rustup component add clippy
+  - rustup show
+
+cargo-fmt:
+  script:
+    - cargo fmt --verbose -- --check
+
+cargo-clippy:
+  script:
+    - cargo clippy --verbose --tests -- -D warnings
+  allow_failure: true
+
+# From https://doc.rust-lang.org/cargo/guide/continuous-integration.html#gitlab-ci
+rust-latest:
+  script:
+    - cargo build --verbose
+    - cargo test --verbose
+
+rust-nightly:
+  image: rustlang/rust:nightly
+  script:
+    - cargo build --verbose
+    - cargo test --verbose
+  allow_failure: true

@@ -97,7 +97,11 @@ fn describe_relay(r: &tor_netdir::Relay) {
     );
 }
 
-pub fn describe_relays(relays: &[tor_netdir::Relay], oneline: bool, indent: usize) {
+pub fn describe_relays(
+    relays: &[tor_netdir::Relay],
+    oneline: bool,
+    indent: usize,
+) {
     let tfmt = format::FormatBuilder::new()
         .column_separator('|')
         .borders('|')

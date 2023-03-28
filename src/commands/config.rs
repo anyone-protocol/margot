@@ -89,11 +89,20 @@ impl BadCommand {
         self.print_footer();
     }
 
-    fn generate(&self, netdir: &tor_netdir::NetDir, tokens: &'static (&str, &str)) -> Result<()> {
+    fn generate(
+        &self,
+        netdir: &tor_netdir::NetDir,
+        tokens: &'static (&str, &str),
+    ) -> Result<()> {
         let relays = find::FindCommand::new(&self.filters).filter(netdir);
 
         self.print_rules(tokens.0, "bad.conf", fmt_addr_rule, &relays);
-        self.print_rules(tokens.1, "approved-routers.conf", fmt_fp_rule, &relays);
+        self.print_rules(
+            tokens.1,
+            "approved-routers.conf",
+            fmt_fp_rule,
+            &relays,
+        );
 
         println!("[+] Found {} relays: {:?}", relays.len(), self.filters);
         Ok(())
@@ -104,7 +113,9 @@ impl BadCommand {
 impl RunnableOffline for ConfigCommand {
     fn run(&self, netdir: &tor_netdir::NetDir) -> Result<()> {
         match &self.subcommand {
-            ConfigSubCommand::BadExit(r) => r.generate(netdir, &BADEXIT_TOKENS),
+            ConfigSubCommand::BadExit(r) => {
+                r.generate(netdir, &BADEXIT_TOKENS)
+            }
             ConfigSubCommand::Reject(r) => r.generate(netdir, &REJECT_TOKENS),
         }
     }

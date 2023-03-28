@@ -17,7 +17,10 @@ pub struct ExtendCommand {
 }
 
 impl ExtendCommand {
-    async fn extend<R: Runtime>(&self, arti_client: &arti_client::TorClient<R>) -> Result<()> {
+    async fn extend<R: Runtime>(
+        &self,
+        arti_client: &arti_client::TorClient<R>,
+    ) -> Result<()> {
         let mut found: bool = false;
         let find = find::FindCommand::new(&self.filters);
         let netdir = arti_client.dirmgr().timely_netdir().unwrap();
@@ -28,7 +31,8 @@ impl ExtendCommand {
             // We take a copy of the fingerprint and nickname for later
             // printing because we loose ownership of the relay object once it
             // is in the TorPath.
-            let fp = relay.rsa_id().to_string().replace('$', "").to_uppercase();
+            let fp =
+                relay.rsa_id().to_string().replace('$', "").to_uppercase();
             let nickname = relay.rs().nickname().to_string();
             let path = tor_circmgr::path::TorPath::new_one_hop(relay);
             let params = CircParameters::default();
@@ -41,7 +45,10 @@ impl ExtendCommand {
 
             match circ {
                 Err(e) => println!("[-] Unable to extend: {}", e),
-                Ok(_) => println!("[+] Successful one hop to: {} - {}", nickname, fp),
+                Ok(_) => println!(
+                    "[+] Successful one hop to: {} - {}",
+                    nickname, fp
+                ),
             };
         }
         if !found {
@@ -71,7 +78,10 @@ impl fmt::Display for TestCommand {
 
 #[async_trait]
 impl<R: Runtime> Runnable<R> for TestCommand {
-    async fn run(&self, arti_client: &arti_client::TorClient<R>) -> Result<()> {
+    async fn run(
+        &self,
+        arti_client: &arti_client::TorClient<R>,
+    ) -> Result<()> {
         match &self.subcommand {
             TestSubCommand::Extend(c) => c.extend(arti_client).await?,
         };
