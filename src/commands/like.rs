@@ -33,7 +33,7 @@ impl RunnableOffline for LikeCommand {
             }
             distances.insert(
                 relay.rsa_id().to_string(),
-                levenshtein(&self.name.as_str(), relay.rs().nickname()),
+                levenshtein(self.name.as_str(), relay.rs().nickname()),
             );
         }
         println!("[+] Top 5 closest nicknames to: {}", self.name);

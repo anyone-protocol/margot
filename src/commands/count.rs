@@ -26,7 +26,8 @@ impl RunnableOffline for CountCommand {
     fn run(&self, netdir: &tor_netdir::NetDir) -> Result<()> {
         // We'll go filter by filter and then do a final count of all filters.
         for filter in &self.filters {
-            let count = netdir.relays().filter(|r| filter.match_relay(r)).count();
+            let count =
+                netdir.relays().filter(|r| filter.match_relay(r)).count();
             println!("[+] {} relays match: {:?}", count, filter);
             if self.list {
                 let find = find::FindCommand::new(&[filter.clone()]);

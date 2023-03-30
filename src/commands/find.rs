@@ -43,17 +43,15 @@ impl FindFilter {
 
     pub fn match_relay(&self, relay: &tor_netdir::Relay) -> bool {
         let mut ret = match &self.filter {
-            Filter::Address(a) => relay
-                .rs()
-                .orport_addrs()
-                .any(|addr| a.contains(addr.ip())),
+            Filter::Address(a) => {
+                relay.rs().orport_addrs().any(|addr| a.contains(addr.ip()))
+            }
             Filter::Nickname(n) => relay.rs().nickname().contains(n),
             Filter::Fingerprint(fp) => fp.match_relay(relay),
             Filter::Flags(f) => relay.rs().flags().contains(*f),
-            Filter::Port(p) => relay
-                .rs()
-                .orport_addrs()
-                .any(|addr| addr.port() == *p),
+            Filter::Port(p) => {
+                relay.rs().orport_addrs().any(|addr| addr.port() == *p)
+            }
             Filter::Version(v) => relay
                 .rs()
                 .version()
@@ -92,7 +90,10 @@ impl FindCommand {
         true
     }
 
-    pub fn filter<'a>(&self, netdir: &'a tor_netdir::NetDir) -> Vec<tor_netdir::Relay<'a>> {
+    pub fn filter<'a>(
+        &self,
+        netdir: &'a tor_netdir::NetDir,
+    ) -> Vec<tor_netdir::Relay<'a>> {
         netdir.relays().filter(|r| self.match_relay(r)).collect()
     }
 
@@ -112,11 +113,13 @@ impl FromStr for FindFilter {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let exclude = s.contains("-:");
-        if let Some(kv) = s.to_string().replace("-", "").split_once(':') {
+        if let Some(kv) = s.to_string().replace('-', "").split_once(':') {
             let filter = match kv.0 {
                 "a" | "addr" => Filter::Address(kv.1.parse().unwrap()),
                 "fl" | "flag" => Filter::Flags(util::parse_routerflag(kv.1)),
-                "f" | "fp" => Filter::Fingerprint(kv.1.parse::<util::RelayFingerprint>()?),
+                "f" | "fp" => Filter::Fingerprint(
+                    kv.1.parse::<util::RelayFingerprint>()?,
+                ),
                 "n" | "nick" => Filter::Nickname(String::from(kv.1)),
                 "p" | "port" => Filter::Port(kv.1.parse().unwrap()),
                 "v" | "version" => Filter::Version(String::from(kv.1)),

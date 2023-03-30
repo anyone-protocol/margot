@@ -19,7 +19,7 @@ impl FromStr for RelayFingerprint {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let fingerprint = s.to_string().replace("$", "");
+        let fingerprint = s.to_string().replace('$', "");
         let fp = match fingerprint.len() {
             40 => {
                 if hex::decode(&fingerprint).is_err() {
@@ -78,7 +78,7 @@ fn describe_relay(r: &tor_netdir::Relay) {
     println!(
         "  > Fingerprint: Rsa: {}, Ed: {}",
         r.rsa_id().to_string().to_uppercase(),
-        r.md().ed25519_id().to_string()
+        r.md().ed25519_id()
     );
     println!("  > Flags: {:?}", r.rs().flags());
     println!("  > Weight: {:?}", r.rs().weight());
@@ -91,13 +91,17 @@ fn describe_relay(r: &tor_netdir::Relay) {
         r.md()
             .family()
             .members()
-            .map(|f| f.to_string().to_uppercase().replace("$", ""))
+            .map(|f| f.to_string().to_uppercase().replace('$', ""))
             .collect::<Vec<String>>()
             .join(" ")
     );
 }
 
-pub fn describe_relays(relays: &[tor_netdir::Relay], oneline: bool, indent: usize) {
+pub fn describe_relays(
+    relays: &[tor_netdir::Relay],
+    oneline: bool,
+    indent: usize,
+) {
     let tfmt = format::FormatBuilder::new()
         .column_separator('|')
         .borders('|')

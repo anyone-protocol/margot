@@ -14,7 +14,8 @@ use tor_rtcompat::Runtime;
 
 #[async_trait]
 pub trait Runnable<R: Runtime> {
-    async fn run(&self, arti_client: &arti_client::TorClient<R>) -> Result<()>;
+    async fn run(&self, arti_client: &arti_client::TorClient<R>)
+        -> Result<()>;
 }
 
 pub trait RunnableOffline {
@@ -23,7 +24,10 @@ pub trait RunnableOffline {
 
 #[async_trait]
 impl<T: RunnableOffline + Send + Sync, R: Runtime> Runnable<R> for T {
-    async fn run(&self, arti_client: &arti_client::TorClient<R>) -> Result<()> {
+    async fn run(
+        &self,
+        arti_client: &arti_client::TorClient<R>,
+    ) -> Result<()> {
         let netdir = arti_client.dirmgr().timely_netdir()?;
         self.run(&netdir)
     }
@@ -37,7 +41,10 @@ pub enum SubCommand {
     Count(count::CountCommand),
     #[structopt(name = "find", about = "Find relay(s) in the consensus")]
     Find(find::FindCommand),
-    #[structopt(name = "like", about = "Match alike relay(s) in the consensus")]
+    #[structopt(
+        name = "like",
+        about = "Match alike relay(s) in the consensus"
+    )]
     Like(like::LikeCommand),
     #[structopt(name = "sybil", about = "Sybil testing")]
     Sybil(sybil::SybilCommand),
@@ -60,7 +67,10 @@ impl SubCommand {
 
 #[async_trait]
 impl<R: Runtime> Runnable<R> for SubCommand {
-    async fn run(&self, arti_client: &arti_client::TorClient<R>) -> Result<()> {
+    async fn run(
+        &self,
+        arti_client: &arti_client::TorClient<R>,
+    ) -> Result<()> {
         self.cmd().run(arti_client).await
     }
 }
