@@ -2,6 +2,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use ipnetwork::IpNetwork;
 use std::fmt;
+use std::path::Path;
 use std::str::FromStr;
 use structopt::StructOpt;
 
@@ -10,6 +11,7 @@ use crate::commands::util;
 use crate::commands::RunnableOffline;
 
 use tor_netdoc::doc::netstatus;
+use tor_netdoc::types::policy::PortPolicy;
 
 #[derive(Debug, Clone)]
 pub enum Filter {
@@ -25,6 +27,8 @@ pub enum Filter {
     Port(u16),
     /// Relay version
     Version(String),
+    /// Port policy
+    PortPolicyFilter(PortPolicy),
 }
 
 #[derive(Debug, Clone)]
@@ -59,6 +63,9 @@ impl FindFilter {
                 .expect("version error")
                 .to_string()
                 .contains(v),
+            Filter::PortPolicyFilter(pp) => &**relay.md().ipv4_policy() == pp,
+            // ^ this is `&Arc<PortPolicy>`, 1st dereference `Arc`,
+            // then `&`, then add `&` to match `&PortPolicy`
         };
         ret ^= self.exclude;
         ret
@@ -113,7 +120,7 @@ impl FromStr for FindFilter {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let exclude = s.contains("-:");
-        if let Some(kv) = s.to_string().replace('-', "").split_once(':') {
+        if let Some(kv) = s.to_string().replace("-:", "").split_once(':') {
             let filter = match kv.0 {
                 "a" | "addr" => Filter::Address(kv.1.parse().unwrap()),
                 "fl" | "flag" => Filter::Flags(util::parse_routerflag(kv.1)),
@@ -123,6 +130,19 @@ impl FromStr for FindFilter {
                 "n" | "nick" => Filter::Nickname(String::from(kv.1)),
                 "p" | "port" => Filter::Port(kv.1.parse().unwrap()),
                 "v" | "version" => Filter::Version(String::from(kv.1)),
+                // Because a [PortPolicy] already contains `accept` or
+                // `reject`, there is no need to use the `exclude` argument
+                // (`-`). If used, it will still negate the policy, ie.
+                // `pp-:"accept 25"` has the same effect as `pp:"reject 25".`
+                "pp" | "portpolicyfilter" => {
+                    Filter::PortPolicyFilter(kv.1.parse::<PortPolicy>()?)
+                }
+                // It takes the port policy from a file and expect the ports or
+                // port ranges to be separated by spaces or commas.
+                // Example: `pf:policy_accept.txt pf:policy_reject.txt`
+                "pf" | "portpolicyfile" => Filter::PortPolicyFilter(
+                    util::portpolicyfile2portpolicy(Path::new(kv.1))?,
+                ),
                 _ => return Err(Error::UnrecognizedFilter(kv.0.to_string())),
             };
             return Ok(FindFilter::new(exclude, filter));
@@ -141,7 +161,28 @@ impl RunnableOffline for FindCommand {
             return Ok(());
         }
         util::describe_relays(&relays, self.oneline, 0);
-
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn port_policy_filter_from_str() {
+        let filter_str = "pp:accept 20-23,43,53,79-81,88,110,143,194,220";
+        let find_filter = FindFilter::from_str(filter_str).unwrap();
+        let port_policy_filter = find_filter.filter;
+        matches!(port_policy_filter, Filter::PortPolicyFilter(_));
+    }
+
+    #[test]
+    #[should_panic(expected = "WrongPolicy(InvalidPolicy)")]
+    // Ports are not in order, what happens when `-` is removed from `20-23`.
+    fn port_policy_filter_from_str_invalid_policy() {
+        let filter_str = "pp:accept 2023,43,53,79-81,88,110,143,194,220";
+        let find_filter = FindFilter::from_str(filter_str).unwrap();
+        let port_policy_filter = find_filter.filter;
+        matches!(port_policy_filter, Filter::PortPolicyFilter(_));
     }
 }

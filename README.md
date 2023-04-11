@@ -251,6 +251,20 @@ Note: part of this section should probably be moved into code documentation.
      [+] 1603 relays matched all
      ```
 
+  - `count pp:"accept 80,443"`, output:
+
+    ```bash
+    [+] 199 relays match: FindFilter { exclude: false, filter: PortPolicyFilter(PortPolicy { allowed: [PortRange { lo: 80, hi: 80 }, PortRange { lo: 443, hi: 443 }] }) }
+    [+] 199 relays matched all
+    ```
+
+  - `pf:testdata/policy_accept.txt`, output:
+
+    ```bash
+    [+] 0 relays match: FindFilter { exclude: false, filter: PortPolicyFilter(PortPolicy { allowed: [PortRange { lo: 20, hi: 23 }, PortRange { lo: 43, hi: 43 }, PortRange { lo: 53, hi: 53 }, PortRange { lo: 79, hi: 81 }, PortRange { lo: 88, hi: 88 }, PortRange { lo: 110, hi: 110 }, PortRange { lo: 143, hi: 143 }, PortRange { lo: 194, hi: 194 }, PortRange { lo: 220, hi: 220 }] }) }
+    [+] 0 relays matched all
+    ```
+
 - `find`: `Find relay(s) in the consensus`, optionally matching some `filter`s.
 
   Filters are written as in the previous subcommands.
