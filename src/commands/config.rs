@@ -11,6 +11,7 @@ static GITLAB_BUG_URL: &str =
 
 static REJECT_TOKENS: (&str, &str) = ("AuthDirReject", "!reject");
 static BADEXIT_TOKENS: (&str, &str) = ("", "!badexit");
+static MIDDLEONLY_TOKENS: (&str, &str) = ("", "!middleonly");
 
 #[derive(Debug, Clone, StructOpt)]
 pub struct BadCommand {
@@ -25,6 +26,8 @@ pub enum ConfigSubCommand {
     BadExit(BadCommand),
     #[structopt(name = "reject", about = "Generate reject rule(s)")]
     Reject(BadCommand),
+    #[structopt(name = "middleonly", about = "Generate middleonly rule(s)")]
+    MiddleOnly(BadCommand),
 }
 
 #[derive(StructOpt)]
@@ -95,7 +98,9 @@ impl BadCommand {
         tokens: &'static (&str, &str),
     ) -> Result<()> {
         let relays = find::FindCommand::new(&self.filters).filter(netdir);
-        // Do not create bad.conf config when there is not token for it
+
+        // Do not create bad.conf config when there is not token for it, as it
+        // is the case for `middleonly` argument.
         if !tokens.0.is_empty() {
             self.print_rules(tokens.0, "bad.conf", fmt_addr_rule, &relays);
         }
@@ -119,6 +124,9 @@ impl RunnableOffline for ConfigCommand {
                 r.generate(netdir, &BADEXIT_TOKENS)
             }
             ConfigSubCommand::Reject(r) => r.generate(netdir, &REJECT_TOKENS),
+            ConfigSubCommand::MiddleOnly(r) => {
+                r.generate(netdir, &MIDDLEONLY_TOKENS)
+            }
         }
     }
 }

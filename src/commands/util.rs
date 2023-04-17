@@ -148,6 +148,7 @@ pub fn parse_routerflag(f: &str) -> netstatus::RelayFlags {
         "fast" => netstatus::RelayFlags::FAST,
         "guard" => netstatus::RelayFlags::GUARD,
         "hsdir" => netstatus::RelayFlags::HSDIR,
+        "middleonly" => netstatus::RelayFlags::MIDDLE_ONLY,
         "noedconsensus" => netstatus::RelayFlags::NO_ED_CONSENSUS,
         "running" => netstatus::RelayFlags::RUNNING,
         "stable" => netstatus::RelayFlags::STABLE,

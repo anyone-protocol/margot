@@ -184,6 +184,29 @@ Note: part of this section should probably be moved into code documentation.
 
       ```
 
+  - `middleonly`: `Generate middleonly rule(s)` for the DirAuths.
+  - The parameters are a ticket number (in `bad-relay-reports` repo) and
+  - optionally some filters.
+
+    It works as the previous commands except that:
+    - it does not generate rules for `bad.conf`.
+    - instead of generating rules for `approved-routers.conf` like
+      `!badexit <fp>`, it generates rules like `!middleonly <fp>`.
+
+    eg:
+
+    - `config middleonly 25 fl:middleonly`, output:
+
+      ```bash
+      [+] Rules for approved-routers.conf:
+
+      -----
+      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
+      !middleonly 006F965E89A9C3A61C9F08A6B31C28F66AF218FD
+      !middleonly 0082C49022C0811D45620D408E068835E2BABA71
+      !middleonly 081A5BAF9775499CAF7CCCAB2AF7765494F3B99F
+      ```
+
 - `count [filters]`: `Count relay(s) in the consensus`, optionally matching
   some `filter`.
 
