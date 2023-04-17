@@ -10,7 +10,7 @@ static GITLAB_BUG_URL: &str =
     "https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues";
 
 static REJECT_TOKENS: (&str, &str) = ("AuthDirReject", "!reject");
-static BADEXIT_TOKENS: (&str, &str) = ("AuthDirBadExit", "!badexit");
+static BADEXIT_TOKENS: (&str, &str) = ("", "!badexit");
 
 #[derive(Debug, Clone, StructOpt)]
 pub struct BadCommand {
@@ -95,8 +95,10 @@ impl BadCommand {
         tokens: &'static (&str, &str),
     ) -> Result<()> {
         let relays = find::FindCommand::new(&self.filters).filter(netdir);
-
-        self.print_rules(tokens.0, "bad.conf", fmt_addr_rule, &relays);
+        // Do not create bad.conf config when there is not token for it
+        if !tokens.0.is_empty() {
+            self.print_rules(tokens.0, "bad.conf", fmt_addr_rule, &relays);
+        }
         self.print_rules(
             tokens.1,
             "approved-routers.conf",

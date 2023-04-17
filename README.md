@@ -25,27 +25,20 @@ Note: part of this section should probably be moved into code documentation.
 
     Several `filter`s can be written one after another separated by an space.
 
+    The output are the rules for `approved-routers.conf` in the form
+    `!badexit <fp>`.
+
     Examples:
     - `config badexit 25`, output:
 
       ```bash
 
-      [+] Rules for bad.conf:
-
-      -----
-
-      # Ticket: <https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25>
-
-      AuthDirReject 104.53.221.159
-      -----
-
       [+] Rules for approved-routers.conf:
 
-      -test extend fl:BADEXIT----
-
+      ----
       # Ticket: <https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25>
 
-      !reject 000A10D43011EA4928A35F610405F92B4433B4DC
+      !badexit 000A10D43011EA4928A35F610405F92B4433B4DC
       [...]
       -----
 
@@ -55,14 +48,6 @@ Note: part of this section should probably be moved into code documentation.
     - `config badexit 25 fl:BADEXIT`, output:
 
       ```bash
-      [+] Rules for bad.conf:
-
-      -----
-      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthDirBadExit 206.55.74.0
-      [...]
-      -----
-
       [+] Rules for approved-routers.conf:
 
       -----
@@ -78,12 +63,6 @@ Note: part of this section should probably be moved into code documentation.
     - `config badexit 25 fp:FFFBFB50A83A414CC21B4CDA93A9674B004705E8` , output:
 
       ```bash
-      [+] Rules for bad.conf:
-
-      -----
-      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthDirBadExit 24.203.134.20
-      -----
 
       [+] Rules for approved-routers.conf:
 
@@ -99,12 +78,6 @@ Note: part of this section should probably be moved into code documentation.
     - `config badexit 25 addr:24.203.134.20`, output:
 
       ```bash
-      [+] Rules for bad.conf:
-
-      -----
-      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthDirBadExit 24.203.134.20
-      -----
 
       [+] Rules for approved-routers.conf:
 
@@ -120,11 +93,6 @@ Note: part of this section should probably be moved into code documentation.
     - `config badexit 25 addr:24.203.134.2`, output:
 
       ```bash
-      [+] Rules for bad.conf:
-
-      -----
-      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      -----
 
       [+] Rules for approved-routers.conf:
 
@@ -139,12 +107,6 @@ Note: part of this section should probably be moved into code documentation.
     - `config badexit 25 n:nestor00patof`, output:
 
       ```bash
-      [+] Rules for bad.conf:
-
-      -----
-      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthDirBadExit 24.203.134.20
-      -----
 
       [+] Rules for approved-routers.conf:
 
@@ -160,15 +122,6 @@ Note: part of this section should probably be moved into code documentation.
     - `config badexit 25 p:8888`, output:
 
       ```bash
-      [+] Rules for bad.conf:
-
-      -----
-      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      AuthDirBadExit 65.109.16.131
-      AuthDirBadExit 104.200.30.152
-      AuthDirBadExit 2600:3c03::f03c:93ff:fecc:2d20
-      AuthDirBadExit 155.248.213.203
-      -----
 
       [+] Rules for approved-routers.conf:
 
@@ -186,12 +139,6 @@ Note: part of this section should probably be moved into code documentation.
     - `config badexit 25 v:0.4.7.0`, output:
 
       ```bash
-      [+] Rules for bad.conf:
-
-      -----
-      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
-      -----
-
       [+] Rules for approved-routers.conf:
 
       -----
@@ -206,9 +153,8 @@ Note: part of this section should probably be moved into code documentation.
     a ticket number (in `bad-relay-reports` repo) and optionally some filters.
 
     It works as the previous command except that:
-    - instead of generating rules for `bad.conf` like `AuthDirBadExit <addr>`,
-      it generates rules like `AuthDirReject`.
-    - instead of generating rules for `approved-routers.conf` like
+    - it also generates rules for `bad.conf` in the form `AuthDirReject <ip>`.
+    - instead of generating rules for `approved-routers.conf` in the form
       `!badexit <fp>`, it generates rules like `!reject <fp>`.
 
     eg:
