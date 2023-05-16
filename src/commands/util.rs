@@ -1,11 +1,14 @@
 use prettytable::format;
 use prettytable::Table;
 use std::fmt;
+use std::fs::read_to_string;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use crate::commands::err::Error;
 
 use tor_netdoc::doc::netstatus;
+use tor_netdoc::types::policy::PortPolicy;
 
 #[derive(Debug, Clone)]
 pub enum RelayFingerprint {
@@ -54,6 +57,32 @@ impl RelayFingerprint {
             RelayFingerprint::Ed(ed) => *ed == relay.id().to_string(),
         }
     }
+}
+
+/// Convert a port policy from a file into a [PortPolicy].
+///
+/// It allows only one `accept` or `reject` keywords at beginning, separated
+/// from the ports by whitespaces.
+/// To specify both accept and reject policies, use different files by the
+/// command line arguments.
+/// It expects the port policy ports or port ranges to be separated by any
+/// number of whitespaces or commas.
+/// It will fail in any other case.
+///
+/// Example file content for an accept policy:
+/// ```
+/// accept
+///  20-23
+///  43
+/// ```
+pub fn portpolicyfile2portpolicy(path: &Path) -> Result<PortPolicy, Error> {
+    let pathbuf = PathBuf::from(path);
+    let content = read_to_string(pathbuf)?;
+    let parts: Vec<_> = content.split_whitespace().collect();
+    let ports_str = parts[1..].join(",");
+    let policy_str = [parts[0], &ports_str].join(" ");
+    let portpolicy = policy_str.parse::<PortPolicy>()?;
+    Ok(portpolicy)
 }
 
 fn get_version(r: &tor_netdir::Relay) -> String {
@@ -156,5 +185,60 @@ pub fn parse_routerflag(f: &str) -> netstatus::RelayFlags {
         "v2dir" => netstatus::RelayFlags::V2DIR,
         "valid" => netstatus::RelayFlags::VALID,
         _ => netstatus::RelayFlags::empty(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const POLICY_ACCEPT: &str = "accept 20-23,43,53,79-81,88,110,143,194,220";
+    const POLICY_ACCEPT1: &str = "accept 1-24,26-118,120-134,140-444,446-464,\
+        466-562,564-586,588-1213,1215-4660,4667-6345,6430-6698,6700-6880,\
+        7000-65535";
+    const POLICY_REJECT: &str = "reject 25,119,135-139,445,563,1214,4661-4666";
+
+    fn root() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+    }
+
+    #[test]
+    fn port_policy_from_file_accept() {
+        let path = root().join("testdata/policy_accept.txt");
+        let port_policy = portpolicyfile2portpolicy(&path).unwrap();
+        let expected_port_policy =
+            POLICY_ACCEPT.parse::<PortPolicy>().unwrap();
+        assert_eq!(expected_port_policy, port_policy);
+    }
+
+    #[test]
+    fn port_policy_from_file_accept_commas() {
+        let path = root().join("testdata/policy_accept_commas.txt");
+        let port_policy = portpolicyfile2portpolicy(&path).unwrap();
+        let expected_port_policy =
+            POLICY_ACCEPT1.parse::<PortPolicy>().unwrap();
+        assert_eq!(expected_port_policy, port_policy);
+    }
+
+    #[test]
+    fn port_policy_from_file_reject() {
+        let path = root().join("testdata/policy_reject.txt");
+        let port_policy = portpolicyfile2portpolicy(&path).unwrap();
+        let expected_port_policy =
+            POLICY_REJECT.parse::<PortPolicy>().unwrap();
+        assert_eq!(expected_port_policy, port_policy)
+    }
+
+    #[test]
+    #[should_panic(expected = "No such file or directory")]
+    fn port_policy_from_file_unexisting() {
+        let path = root().join("testdata/unexisting.txt");
+        let _port_policy = portpolicyfile2portpolicy(&path).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn port_policy_from_file_invalid_policy() {
+        let path = root().join("testdata/policy_invalid.txt");
+        let _port_policy = portpolicyfile2portpolicy(&path).unwrap();
     }
 }
