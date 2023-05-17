@@ -19,4 +19,6 @@ pub enum Error {
     WrongPolicy(#[from] PolicyError),
     #[error("IO error: {0}")]
     WrongIO(#[from] std::io::Error),
+    #[error("Wrong parent: {0}")]
+    WrongParent(String),
 }
