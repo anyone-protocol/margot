@@ -7,6 +7,8 @@ use std::str::FromStr;
 
 use crate::commands::err::Error;
 
+use tor_linkspec::RelayId;
+use tor_netdir::{NetDir, Relay};
 use tor_netdoc::doc::netstatus;
 use tor_netdoc::types::policy::PortPolicy;
 
@@ -186,6 +188,131 @@ pub fn parse_routerflag(f: &str) -> netstatus::RelayFlags {
         "valid" => netstatus::RelayFlags::VALID,
         _ => netstatus::RelayFlags::empty(),
     }
+}
+
+/// Generate an String from a relay consensus weight in the form:
+/// `<unmeasured><measured>`
+///
+pub fn weight2string(relay: &Relay) -> String {
+    match relay.rs().weight() {
+        netstatus::RelayWeight::Unmeasured(unmeasured) => {
+            format!("{unmeasured}0")
+        }
+        netstatus::RelayWeight::Measured(measured) => {
+            format!("0{measured}")
+        }
+        &_ => "00".to_string(),
+    }
+}
+
+/// Generate an relay Vector representation from some relay's attributes
+///
+/// [trnnr](https://github.com/NullHypothesis/trnnr) generates the String
+/// from the relay's server descriptor:
+/// - nickname
+/// - address
+/// - or_port
+/// - dirport
+/// - tor_version
+/// - exit_policy
+/// - average_bandwidth
+/// - burst_bandwidth
+/// - observed_bandwidth
+/// - operating_system
+/// - published
+/// - uptime
+/// - contact
+///
+/// [sybilhunter](https://github.com/NullHypothesis/sybilhunter) generates the String
+/// from the relay's network status:
+/// - Nickname
+/// - Address
+/// - IPv4ORPort
+/// - IPv4DirPort
+/// - Flags
+/// - TorVersion
+/// - PortList,
+///
+/// and the relay's server descriptor:
+/// - BandwidthAvg
+/// - BandwidthBurst
+/// - OperatingSystem
+/// - Published
+/// - Uptime
+/// - Contact
+///
+/// Here we do not obtain server descriptors because there isn't an easy way to
+/// obtain them from arti yet
+/// (see https://gitlab.torproject.org/tpo/core/arti/-/issues/874), so the
+/// Vector is created from the relay's network status:
+/// - nickname
+/// - orport_addres
+/// - flags
+/// - tor version
+/// - weight
+///
+/// We could also use:
+/// - family
+/// - ipv4_policy
+/// - ipv6_policy
+///
+/// But these last ones increase considerably the time to process the
+/// strings.
+///
+pub fn relay2vec(relay: &Relay) -> Vec<String> {
+    vec![
+        relay.rs().nickname().to_string(),
+        // IP and port will get separated by a colon
+        relay
+            .rs()
+            .orport_addrs()
+            .map(|a| a.to_string().replace(':', ""))
+            .collect::<Vec<_>>()
+            .join(""),
+        relay.rs().flags().bits().to_string(),
+        relay.rs().version().expect("Version error").to_string(),
+        weight2string(relay),
+    ]
+}
+
+/// Convert a relay Vector representation to a String without any
+/// separators.
+///
+/// It is used to compare Levenshtein distances.
+///
+pub fn relay2string(relay: &Relay) -> String {
+    relay2vec(relay).join("")
+}
+
+/// Convert a relay Vector representation to a String separated by `, `.
+///
+/// It is used to print Levenshtein distances.
+///
+pub fn relay2print(relay: &Relay) -> String {
+    [
+        relay.rsa_id().to_string().replace('$', "").to_uppercase(),
+        relay2vec(relay).join(", "),
+    ]
+    .join(", ")
+}
+
+/// Print relays Levenshtein distances.
+///
+pub fn print_distances(distances: Vec<(usize, Relay)>) {
+    println!("distance: fingerprint, nickname, ip.port, flags bits, tor version, unmeasured measured");
+    let distances_print: Vec<_> = distances
+        .iter()
+        .take(20)
+        .map(|item| format!("{}: {}", item.0, relay2print(&item.1)))
+        .collect();
+    println!("{}", distances_print.join("\n"));
+}
+
+/// Obtain a relay from the consensus by its RSA id.
+///
+pub fn id2relay<'a>(nd: &'a NetDir, s: &str) -> Result<Relay<'a>, Error> {
+    let id = RelayId::from_str(s).map_err(|_| Error::NoSuchRelay)?;
+    nd.by_id(&id).ok_or(Error::NoSuchRelay)
 }
 
 #[cfg(test)]

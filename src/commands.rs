@@ -4,6 +4,7 @@ mod err;
 mod find;
 mod like;
 mod sybil;
+mod sybilhunter;
 mod test;
 mod util;
 
@@ -50,6 +51,11 @@ pub enum SubCommand {
     Sybil(sybil::SybilCommand),
     #[structopt(name = "test", about = "Run test(s) on one or many relay(s)")]
     Test(test::TestCommand),
+    #[structopt(
+        name = "sybilhunter",
+        about = "Discover Sybil relays which are configured in a similar way"
+    )]
+    SybilHunter(sybilhunter::SybilHunterCommand),
 }
 
 impl SubCommand {
@@ -61,6 +67,7 @@ impl SubCommand {
             SubCommand::Like(c) => c,
             SubCommand::Sybil(c) => c,
             SubCommand::Test(c) => c,
+            SubCommand::SybilHunter(c) => c,
         }
     }
 }

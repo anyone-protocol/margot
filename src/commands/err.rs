@@ -21,4 +21,6 @@ pub enum Error {
     WrongIO(#[from] std::io::Error),
     #[error("Wrong parent: {0}")]
     WrongParent(String),
+    #[error("No such relay")]
+    NoSuchRelay,
 }

@@ -297,6 +297,21 @@ Note: part of this section should probably be moved into code documentation.
     +-----------+-------------------------------------------+---------------------------------------------+----------+---------------------+
     ```
 
+- `sybilhunter <fingerprint>`: `Discover Sybil relays which are configured in a similar way`
+
+    eg:
+    `sybilhunter 501B3DBF250B094A05CA5DBC424AD4C3D46721A2`, output:
+
+    ```bash
+    Reference string: CalyxInstitute04162.247.74.20444374840.4.7.13075000
+    [+] Computing distances...
+    [+] Top 20 closest relays to: 501B3DBF250B094A05CA5DBC424AD4C3D46721A2
+    distance: fingerprint, nickname, ip.port, flags bits, tor version, unmeasured measured
+    0: 501B3DBF250B094A05CA5DBC424AD4C3D46721A2, CalyxInstitute04, 162.247.74.204443, 7484, 0.4.7.13, 075000
+    [...]
+    21: 93D3B5088A6813F679A426323AE0125FB4FE7728, RunningOnFumes1, 104.244.75.74443, 7484, 0.4.7.13, 06500
+    ```
+
 - `test`: `Run test(s) on one or many relay(s)`
   - `extend <filters>`: Circuit `Extend to a relay`, optionally matching
     some `filter`s.
