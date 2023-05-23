@@ -85,6 +85,13 @@ impl BadCommand {
         Ok(())
     }
 
+    fn print_fp_comment(&self, file: &mut File) -> Result<()> {
+        let fp_text = "# Fingerprints:\n";
+        print!("{}", fp_text);
+        file.write_all(fp_text.as_bytes())?;
+        Ok(())
+    }
+
     fn print_footer(&self) {
         println!("-----");
         println!();
@@ -105,21 +112,18 @@ impl BadCommand {
     fn print_rules<F>(
         &self,
         prefix: &str,
-        fname: &str,
+        file: &mut File,
         fmt_fn: F,
         relays: &[tor_netdir::Relay<'_>],
     ) -> Result<(), anyhow::Error>
     where
         F: Fn(&str, &tor_netdir::Relay<'_>) -> String,
     {
-        let mut file = self.open_file(fname)?;
-        self.print_header(fname, &mut file)?;
         for relay in relays {
             let rule = fmt_fn(prefix, relay);
             print!("{}", rule);
             file.write_all(rule.as_bytes())?;
         }
-        self.print_footer();
         Ok(())
     }
 
@@ -133,14 +137,32 @@ impl BadCommand {
         // Do not create bad.conf config when there is not token for it, as it
         // is the case for `middleonly` argument.
         if !tokens.0.is_empty() {
-            self.print_rules(tokens.0, BAD_PATH, fmt_addr_rule, &relays)?;
+            // When token.0 is present, write also into BAD_PATH
+            let fname = BAD_PATH;
+            let mut file = self.open_file(fname)?;
+            self.print_header(fname, &mut file)?;
+
+            // Print also the fingeprints in a comment
+            self.print_fp_comment(&mut file)?;
+            self.print_rules(
+                "#              ",
+                &mut file,
+                fmt_fp_rule,
+                &relays,
+            )?;
+            // Print the addresses when there's the `AuthDirReject` token
+            self.print_rules(tokens.0, &mut file, fmt_addr_rule, &relays)?;
+
+            self.print_footer();
         }
-        self.print_rules(
-            tokens.1,
-            APPROVED_ROUTERS_PATH,
-            fmt_fp_rule,
-            &relays,
-        )?;
+        // Write into APPROVED_ROUTERS_PATH in any case
+        let fname = APPROVED_ROUTERS_PATH;
+        let mut file = self.open_file(fname)?;
+        self.print_header(fname, &mut file)?;
+
+        self.print_rules(tokens.1, &mut file, fmt_fp_rule, &relays)?;
+
+        self.print_footer();
 
         println!("[+] Found {} relays: {:?}", relays.len(), self.filters);
         Ok(())
