@@ -15,7 +15,8 @@ use crate::commands::RunnableOffline;
 static GITLAB_BUG_URL: &str =
     "https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues";
 
-static REJECT_TOKENS: (&str, &str) = ("AuthDirReject", "!reject");
+static REJECT_TOKENS: (&str, &str) = ("", "!reject");
+static REJECTBAD_TOKENS: (&str, &str) = ("AuthDirReject", "!reject");
 static BADEXIT_TOKENS: (&str, &str) = ("", "!badexit");
 static MIDDLEONLY_TOKENS: (&str, &str) = ("", "!middleonly");
 
@@ -36,6 +37,11 @@ pub enum ConfigSubCommand {
     BadExit(BadCommand),
     #[structopt(name = "reject", about = "Generate reject rule(s)")]
     Reject(BadCommand),
+    #[structopt(
+        name = "rejectbad",
+        about = "Generate reject rule(s), writing to bad.conf too"
+    )]
+    RejectBad(BadCommand),
     #[structopt(name = "middleonly", about = "Generate middleonly rule(s)")]
     MiddleOnly(BadCommand),
 }
@@ -177,6 +183,9 @@ impl RunnableOffline for ConfigCommand {
                 r.generate(netdir, &BADEXIT_TOKENS)
             }
             ConfigSubCommand::Reject(r) => r.generate(netdir, &REJECT_TOKENS),
+            ConfigSubCommand::RejectBad(r) => {
+                r.generate(netdir, &REJECTBAD_TOKENS)
+            }
             ConfigSubCommand::MiddleOnly(r) => {
                 r.generate(netdir, &MIDDLEONLY_TOKENS)
             }
