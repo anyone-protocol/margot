@@ -29,12 +29,13 @@ pub enum Filter {
     Version(String),
     /// Port policy
     PortPolicyFilter(PortPolicy),
+    FpsFileFilter(Vec<util::RelayFingerprint>),
 }
 
 #[derive(Debug, Clone)]
 pub struct FindFilter {
     exclude: bool,
-    filter: Filter,
+    pub filter: Filter,
 }
 
 impl FindFilter {
@@ -66,6 +67,11 @@ impl FindFilter {
             Filter::PortPolicyFilter(pp) => &**relay.md().ipv4_policy() == pp,
             // ^ this is `&Arc<PortPolicy>`, 1st dereference `Arc`,
             // then `&`, then add `&` to match `&PortPolicy`
+            // The following will try to find the relay in the list of parsed
+            // fingerprints from a file.
+            Filter::FpsFileFilter(ff) => {
+                ff.iter().any(|fp| fp.match_relay(relay))
+            }
         };
         ret ^= self.exclude;
         ret
@@ -143,6 +149,9 @@ impl FromStr for FindFilter {
                 "pf" | "portpolicyfile" => Filter::PortPolicyFilter(
                     util::portpolicyfile2portpolicy(Path::new(kv.1))?,
                 ),
+                "ff" | "fingerprintfile" => {
+                    Filter::FpsFileFilter(util::fpfile2fps(Path::new(kv.1))?)
+                }
                 _ => return Err(Error::UnrecognizedFilter(kv.0.to_string())),
             };
             return Ok(FindFilter::new(exclude, filter));

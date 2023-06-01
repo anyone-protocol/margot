@@ -16,6 +16,7 @@ Note: part of this section should probably be moved into code documentation.
 
     A `filter` can be:
     - `addr:<IP address>`
+    - `ff:<fingerprints file>`
     - `fl:<flag>`
     - `fp:<fingerprint>`
     - `p:<port>`
@@ -27,6 +28,10 @@ Note: part of this section should probably be moved into code documentation.
 
     The output are the rules for `approved-routers.conf` in the form
     `!badexit <fp>`.
+
+    If the filter is `ff`, it'll also include in `approved-routers.conf` the
+    fingerprints that weren't found in the consensus. If a fingerprint could
+    not be parsed, it'll be ignored but printed to the stdout.
 
     Examples:
     - `config badexit 25`, output:
@@ -209,6 +214,33 @@ Note: part of this section should probably be moved into code documentation.
       -----
 
       [+] Found 3 relays: [FindFilter { exclude: false, filter: Port(8888) }]
+
+      ```
+
+    - `config rejectbad 25 ff:testdata/fps.txt`, output:
+      ```bash
+      Errors parsing testdata/fps.txt: Wrong fingerprint length: 0123456789abcdef0123456789abcdef0123456
+      Errors parsing testdata/fps.txt: Wrong fingerprint length: 0123456789abcdef0123456789abcdef0123456
+      [+] Rules for torrc.d/bad.conf:
+
+      -----
+
+      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
+      # Fingerprints:
+      #               0011BD2485AD45D984EC4159C88FC066E5E3300E
+      AuthDirReject 162.247.74.201
+      -----
+
+      [+] Rules for approved-routers.d/approved-routers.conf:
+
+      -----
+
+      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
+      !reject 0011BD2485AD45D984EC4159C88FC066E5E3300E
+      !reject 0123456789ABCDEF0123456789ABCDEF01234567
+      -----
+
+      [+] Found 1 relays: [FindFilter { exclude: false, filter: FpsFileFilter([Rsa("0011bd2485ad45d984ec4159c88fc066e5e3300e"), Rsa("0123456789abcdef0123456789abcdef01234567")]) }]
 
       ```
 
