@@ -152,26 +152,54 @@ Note: part of this section should probably be moved into code documentation.
   - `reject`: `Generate reject rule(s)` for the DirAuths. The parameters are
     a ticket number (in `bad-relay-reports` repo) and optionally some filters.
 
-    It works as the previous command except that:
-    - it also generates rules for `bad.conf` in the form `AuthDirReject <ip>`.
-    - instead of generating rules for `approved-routers.conf` in the form
-      `!badexit <fp>`, it generates rules like `!reject <fp>`.
+    It works as the previous command but instead of generating rules for
+    `approved-routers.conf` in the form `!badexit <fp>`, it generates rules
+    like `!reject <fp>`.
 
     eg:
     - `config reject 25 p:8888`, output:
 
       ```bash
-      [+] Rules for bad.conf:
+
+      [+] Rules for approved-routers.d/approved-routers.conf:
 
       -----
       # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
+      !reject 2BC31B73E0000B66981F7734D2B1F2C16C27D0BB
+      !reject 673510F48FA7EBE1C21A9A32566AB9B7AA8EFC48
+      !reject 94A8976E00C68ED23695D0668D87B3E7F126AF62
+      -----
+
+      [+] Found 3 relays: [FindFilter { exclude: false, filter: Port(8888) }]
+
+      ```
+
+
+  - `rejectbad <ticket_number> [filters]` : `Generate reject rule(s), writing to bad.conf too`.
+
+    It works as the previous command but it also generates rules for
+    `bad.conf` in the form `AuthDirReject <ip>` plus comments with the
+    corresponding relays' fingerprints.
+
+    eg:
+
+    - `config rejectbad 25 p:8888`, output:
+      ```bash
+      [+] Rules for torrc.d/bad.conf:
+
+      -----
+      # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
+      # Fingerprints:
+      #               2BC31B73E0000B66981F7734D2B1F2C16C27D0BB
+      #               5BE999DDB0916332AC21CE4AE9CED29FD7AAB284
+      #               94A8976E00C68ED23695D0668D87B3E7F126AF62
       AuthDirReject 65.109.16.131
       AuthDirReject 104.200.30.152
       AuthDirReject 2600:3c03::f03c:93ff:fecc:2d20
       AuthDirReject 155.248.213.203
       -----
 
-      [+] Rules for approved-routers.conf:
+      [+] Rules for approved-routers.d/approved-routers.conf:
 
       -----
       # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
