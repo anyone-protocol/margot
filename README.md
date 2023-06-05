@@ -213,8 +213,8 @@ Note: part of this section should probably be moved into code documentation.
       ```
 
   - `middleonly`: `Generate middleonly rule(s)` for the DirAuths.
-  - The parameters are a ticket number (in `bad-relay-reports` repo) and
-  - optionally some filters.
+    The parameters are a ticket number (in `bad-relay-reports` repo) and
+    optionally some filters.
 
     It works as the previous commands except that:
     - it does not generate rules for `bad.conf`.
