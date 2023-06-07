@@ -216,8 +216,8 @@ mod tests {
         let file = bad_command.open_file(fname);
         assert!(file.is_err());
     }
-    #[test]
 
+    #[test]
     fn print_header_ok() {
         let binding = temp_dir().join("approved-routers.conf");
         let fname = binding.to_str().unwrap();
