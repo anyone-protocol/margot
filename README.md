@@ -17,7 +17,7 @@ Note: part of this section should probably be moved into code documentation.
     A `filter` can be:
     - `addr:<IP address>`
     - `fl:<flag>`
-    - `fp:<fingprint`
+    - `fp:<fingerprint>`
     - `p:<port>`
     - `v:<tor version>`
     A filter can be `exclude` (boolean), ie. not matching a filter, with the
