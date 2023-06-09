@@ -56,8 +56,16 @@ pub struct ConfigCommand {
 fn fmt_addr_rule(prefix: &str, relay: &tor_netdir::Relay<'_>) -> String {
     let rules: Vec<_> = relay
         .rs()
+        // This returns all the ORPort IPs (v4 and v6)
         .orport_addrs()
-        .map(|a| format!("{} {}", prefix, a.ip()))
+        .map(|a| {
+            if a.is_ipv4() {
+                format!("{} {}", prefix, a.ip())
+            } else {
+                // Enclose v6 IPs in brackets
+                format!("{} [{}]", prefix, a.ip())
+            }
+        })
         .collect();
     [rules.join("\n"), "\n".to_string()].concat()
 }
