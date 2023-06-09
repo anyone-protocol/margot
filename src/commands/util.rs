@@ -42,8 +42,10 @@ impl FromStr for RelayFingerprint {
 impl fmt::Display for RelayFingerprint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            RelayFingerprint::Rsa(rsa) => rsa,
-            RelayFingerprint::Ed(ed) => ed,
+            // Convert to uppercase so that when they are printend or converted
+            // `to_string`, they're always uppercase
+            RelayFingerprint::Rsa(rsa) => rsa.to_uppercase(),
+            RelayFingerprint::Ed(ed) => ed.to_uppercase(),
         };
         write!(f, "{}", s)
     }
@@ -85,6 +87,43 @@ pub fn portpolicyfile2portpolicy(path: &Path) -> Result<PortPolicy, Error> {
     let policy_str = [parts[0], &ports_str].join(" ");
     let portpolicy = policy_str.parse::<PortPolicy>()?;
     Ok(portpolicy)
+}
+
+/// Convert fingerprints from a file into a Vector of RelayFingerprints
+///
+pub fn fpfile2fps(path: &Path) -> Result<Vec<RelayFingerprint>, Error> {
+    let pathbuf = PathBuf::from(path);
+    let content = read_to_string(pathbuf)?;
+    let parts: Vec<_> = content.split_whitespace().collect();
+    let (fingerprints, errors): (Vec<_>, Vec<_>) = parts
+        .iter()
+        .map(|part| part.parse::<RelayFingerprint>())
+        .partition(Result::is_ok);
+    if !errors.is_empty() {
+        println!(
+            "Errors parsing {}: {}",
+            path.display(),
+            errors
+                .iter()
+                .map(|e| e.as_ref().unwrap_err().to_string())
+                .collect::<Vec<_>>()
+                .join("\n")
+        );
+    }
+    Ok(fingerprints.into_iter().map(Result::unwrap).collect())
+}
+
+/// Convert a Relay Vector into an String Vectors, with the relays' Rsa
+/// fingerprints.
+///
+pub fn relays2fps(relays: &[tor_netdir::Relay]) -> Vec<String> {
+    let found_fps: Vec<_> = relays
+        .iter()
+        .map(|relay| {
+            relay.rsa_id().to_string().replace('$', "").to_uppercase()
+        })
+        .collect();
+    found_fps
 }
 
 fn get_version(r: &tor_netdir::Relay) -> String {
