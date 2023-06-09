@@ -11,20 +11,20 @@ default = [ "tokio" ]
 tokio = [ "tor-rtcompat/tokio" ]
 
 [dependencies]
-anyhow = "1.0.38"
+anyhow = "1.0"
 async-trait = "0.1"
-config = { version="0.11.0", default-features=false }
+config = { version="0.11", default-features=false }
 futures = "0.3"
 hex = { version = "0.4" }
 ipnetwork = "0.17"
-levenshtein = "1.0.5"
+levenshtein = "1.0"
 multimap = "0.8"
 prettytable-rs = "0.8"
 rand = "0.8"
-serde = { version = "1.0.124", features = ["derive"] }
-simple-logging = "2.0.2"
+serde = { version = "1.0", features = ["derive"] }
+simple-logging = "2.0"
 structopt = { version = "0.3" }
-thiserror = "1.0.24"
+thiserror = "1.0"
 tokio-crate = { package = "tokio", version = "1.7", features = [
     "io-util",
     "macros",
