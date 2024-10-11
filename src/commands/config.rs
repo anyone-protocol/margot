@@ -13,8 +13,8 @@ use crate::commands::find;
 use crate::commands::util;
 use crate::commands::RunnableOffline;
 
-static GITLAB_BUG_URL: &str =
-    "https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues";
+static GITHUB_BUG_URL: &str =
+    "https://github.com/anyone-protocol/ator-protocol/issues";
 
 static REJECT_TOKENS: (&str, &str) = ("", "!reject");
 static REJECTBAD_TOKENS: (&str, &str) = ("AuthDirReject", "!reject");
@@ -22,8 +22,8 @@ static BADEXIT_TOKENS: (&str, &str) = ("", "!badexit");
 static MIDDLEONLY_TOKENS: (&str, &str) = ("", "!middleonly");
 
 static APPROVED_ROUTERS_PATH: &str =
-    "approved-routers.d/approved-routers.conf";
-static BAD_PATH: &str = "torrc.d/bad.conf";
+    "data/approved-routers.d/approved-routers.conf";
+static BAD_PATH: &str = "data/anonrc.d/bad.conf";
 
 #[derive(Debug, Clone, StructOpt)]
 pub struct BadCommand {
@@ -88,7 +88,7 @@ impl BadCommand {
     fn comment(&self) -> String {
         // Add new line at the start of the comment to visually separated from
         // previous rules
-        format!("\n# Ticket: {}/{}\n", GITLAB_BUG_URL, self.ticket)
+        format!("\n# Ticket: {}/{}\n", GITHUB_BUG_URL, self.ticket)
     }
 
     fn print_header(&self, fname: &str, file: &mut File) -> Result<()> {
