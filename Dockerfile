@@ -1,25 +1,42 @@
-# Start with the Rust image, which includes tools for compiling and running Rust applications
+# Use the official Rust image as the base image
 FROM rust:latest
 
-# Set the working directory
+# Set the architecture dynamically (TARGETARCH will be provided via --build-arg or default to x86_64)
+ARG TARGETARCH
+
+# Set the working directory inside the container
 WORKDIR /usr/src/margot
 
-# Install necessary dependencies (including bash)
-RUN apt-get update && apt-get install -y gcc-aarch64-linux-gnu bash
-
-# Copy the Cargo.toml and Cargo.lock files to cache dependencies
+# Copy the Cargo.toml and Cargo.lock to leverage Docker cache for dependencies
 COPY Cargo.toml Cargo.lock ./
 
-# Build dependencies so that they are cached
+# Create a dummy src directory and build dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs && cargo build --release
 
-# Copy the actual source code
+# Now copy the actual source files
 COPY . .
 
-# Compile the project for ARM architecture
-RUN rustup target add aarch64-unknown-linux-gnu && cargo build --target aarch64-unknown-linux-gnu --release
+# Conditional: Install the appropriate target based on architecture
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+      rustup target add aarch64-unknown-linux-gnu; \
+    else \
+      rustup target add x86_64-unknown-linux-gnu; \
+    fi
+
+# Build the project for the correct target based on architecture
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+      cargo build --release --target aarch64-unknown-linux-gnu; \
+    else \
+      cargo build --release --target x86_64-unknown-linux-gnu; \
+    fi
+
+# Set the command to run the appropriate binary
+#CMD if [ "$TARGETARCH" = "arm64" ]; then \
+#      /usr/src/app/target/aarch64-unknown-linux-gnu/release/my-rust-app; \
+#    else \
+#      /usr/src/app/target/x86_64-unknown-linux-gnu/release/my-rust-app; \
+#    fi
 
 # Expose bash as the entrypoint, but you can still run margot commands by overriding it
 ENTRYPOINT ["/bin/bash"]
 
-#ENTRYPOINT ["/usr/src/margot/target/aarch64-unknown-linux-gnu/release/margot"]
