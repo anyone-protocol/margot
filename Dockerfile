@@ -31,12 +31,10 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
     fi
 
 # Set the command to run the appropriate binary
-#CMD if [ "$TARGETARCH" = "arm64" ]; then \
-#      /usr/src/app/target/aarch64-unknown-linux-gnu/release/my-rust-app; \
-#    else \
-#      /usr/src/app/target/x86_64-unknown-linux-gnu/release/my-rust-app; \
-#    fi
+CMD if [ "$TARGETARCH" = "arm64" ]; then \
+      target/aarch64-unknown-linux-gnu/release/margot; \
+    else \
+      target/x86_64-unknown-linux-gnu/release/margot; \
+    fi
 
-# Expose bash as the entrypoint, but you can still run margot commands by overriding it
-ENTRYPOINT ["/bin/bash"]
 
