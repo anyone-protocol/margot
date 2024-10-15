@@ -9,7 +9,7 @@ inputs:
   nomad-addr:
     required: true
   docker-tag:
-    required: true  
+    required: true
 
 runs:
   using: "composite"
@@ -25,4 +25,3 @@ runs:
         curl -L https://releases.hashicorp.com/nomad/1.6.3/nomad_1.6.3_linux_amd64.zip -o nomad.zip
         unzip nomad.zip
         ./nomad job run operations/deploy-${{ inputs.environment }}.hcl
-        ./nomad job run operations/geo-db-update-${{ inputs.environment }}.hcl

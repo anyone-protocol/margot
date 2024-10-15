@@ -43,9 +43,8 @@ job "margot-job-dev" {
 
       config {
         image = "ghcr.io/anyone-protocol/margot:DEPLOY_TAG"
-        args = [
-          "config rejectbad 202 fp:9308F49A225022FA39011033E1C31EFF5B7B5000"
-        ]
+        command = "config"
+        args = ["rejectbad", "89", "fp:9308F49A225022FA39011033E1C31EFF5B7B5000"]
       }
     }
   }
