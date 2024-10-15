@@ -1,9 +1,15 @@
-job "margot-dev" {
+job "margot-job-dev" {
   datacenters = ["ator-fin"]
-  type        = "service"
-  namespace   = "ator-network"
+  type = "batch"
+  namespace = "ator-network"
 
-  group "margot-dev-group" {
+  periodic {
+    cron  = "*/10 * * * *" # Runs every 10 minutes
+    prohibit_overlap = true
+  }
+
+  group "margot-job-dev" {
+
     count = 3
 
     spread {
@@ -26,36 +32,21 @@ job "margot-dev" {
       source    = "margot-dev"
     }
 
-    volume "margot-destination-dev" {
-      type      = "host"
-      read_only = false
-      source    = "margot-destination-dev"
-    }
-
-    task "margot-dev-task" {
+    task "margot-script" {
       driver = "docker"
 
       volume_mount {
         volume      = "margot-dev"
-        destination = "/usr/src/margot/data"
+        destination = "/data"
         read_only   = false
       }
 
       config {
-        image   = "ghcr.io/anyone-protocol/margot-dev:DEPLOY_TAG"
+        image = "ghcr.io/anyone-protocol/margot:58b61cf341bb85ddd7f27c85efa3234fee739531"
+        args = [
+          "config rejectbad 202 fp:9308F49A225022FA39011033E1C31EFF5B7B5000"
+        ]
       }
-
-      service {
-        name     = "margot-dev-task"
-        tags     = ["logging"]
-      }
-
-      resources {
-        cpu    = 1024
-        memory = 2560
-      }
-
     }
-
   }
 }
