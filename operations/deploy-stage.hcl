@@ -4,7 +4,7 @@ job "margot-job-stage" {
   namespace = "ator-network"
 
   periodic {
-    cron  = "*/10 * * * *" # Runs every 10 minutes
+    crons  = ["*/10 * * * *"] # Runs every 10 minutes
     prohibit_overlap = true
   }
 
@@ -42,10 +42,20 @@ job "margot-job-stage" {
       }
 
       config {
-        image = "ghcr.io/anyone-protocol/margot:DEPLOY_TAG"
-        args = [
-          "config rejectbad 202 fp:9308F49A225022FA39011033E1C31EFF5B7B5000"
-        ]
+        volumes = ["local/bad-relays:/usr/src/margot/bad-relays:ro"]
+        image = "ghcr.io/anyone-protocol/margot:3ffd572217a96d23e4c260ff0fe55b0c4ac6c0a6"
+        command = "./target/x86_64-unknown-linux-gnu/release/margot"
+        args = ["config", "rejectbad", "0", "ff:bad-relays"]
+      }
+
+      template {
+        change_mode = "noop"
+        data        = <<EOH
+F740DDDB1A6B536B5CC47111BFE4E2F7CF9B4C28
+A7C2DF525D373D6A0C4F2540C3927ADF511124CC
+EE2A621042994B29452C12FF3B6F62D9E957758C
+        EOH
+        destination = "local/bad-relays"
       }
     }
   }
