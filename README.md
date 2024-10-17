@@ -190,7 +190,7 @@ Note: part of this section should probably be moved into code documentation.
 
     - `config rejectbad 25 p:8888`, output:
       ```bash
-      [+] Rules for torrc.d/bad.conf:
+      [+] Rules for anonrc.d/bad.conf:
 
       -----
       # Ticket: https://gitlab.torproject.org/tpo/network-health/bad-relay-reports/-/issues/25
@@ -221,7 +221,7 @@ Note: part of this section should probably be moved into code documentation.
       ```bash
       Errors parsing testdata/fps.txt: Wrong fingerprint length: 0123456789abcdef0123456789abcdef0123456
       Errors parsing testdata/fps.txt: Wrong fingerprint length: 0123456789abcdef0123456789abcdef0123456
-      [+] Rules for torrc.d/bad.conf:
+      [+] Rules for anonrc.d/bad.conf:
 
       -----
 
