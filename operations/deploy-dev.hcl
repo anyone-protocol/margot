@@ -26,26 +26,24 @@ job "margot-job-dev" {
       }
     }
 
-    volume "margot-dev" {
+    volume "dir-auth-dev" {
       type      = "host"
       read_only = false
-      source    = "margot-dev"
+      source    = "dir-auth-dev"
     }
 
     task "margot-script" {
       driver = "docker"
 
       volume_mount {
-        volume      = "margot-dev"
-        destination = "/data"
+        volume      = "dir-auth-dev"
+        destination = "/usr/src/app/anon-data"
         read_only   = false
       }
 
       config {
-        volumes = ["local/bad-relays:/usr/src/margot/bad-relays:ro"]
-        image = "ghcr.io/anyone-protocol/margot:3ffd572217a96d23e4c260ff0fe55b0c4ac6c0a6"
-        command = "./target/x86_64-unknown-linux-gnu/release/margot"
-        args = ["config", "rejectbad", "0", "ff:bad-relays"]
+        volumes = ["local/bad-relays:/usr/src/app/bad-relays:ro"]
+        image = "ghcr.io/anyone-protocol/margot:DEPLOY_TAG"
       }
 
       template {
