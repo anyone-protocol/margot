@@ -38,36 +38,32 @@ job "margot-job-live" {
       }
     }
 
-    volume "margot-live" {
+    volume "dir-auth-live" {
       type      = "host"
       read_only = false
-      source    = "margot-live"
+      source    = "dir-auth-live"
     }
 
     task "margot-script" {
       driver = "docker"
 
       volume_mount {
-        volume      = "margot-live"
-        destination = "/data"
+        volume      = "dir-auth-live"
+        destination = "/usr/src/app/anon-data"
         read_only   = false
       }
 
       config {
-        volumes = ["local/bad-relays:/usr/src/margot/bad-relays:ro"]
-        image = "ghcr.io/anyone-protocol/margot:3ffd572217a96d23e4c260ff0fe55b0c4ac6c0a6"
-        command = "./target/x86_64-unknown-linux-gnu/release/margot"
-        args = ["config", "rejectbad", "0", "ff:bad-relays"]
+        volumes = ["local/approved-routers:/usr/src/app/approved-routers:ro"]
+        image = "ghcr.io/anyone-protocol/margot:DEPLOY_TAG"
       }
 
       template {
         change_mode = "noop"
         data        = <<EOH
-F740DDDB1A6B536B5CC47111BFE4E2F7CF9B4C28
-A7C2DF525D373D6A0C4F2540C3927ADF511124CC
-EE2A621042994B29452C12FF3B6F62D9E957758C
+!reject B6F95D3D76454610896D11ABA4734544B17E397C
         EOH
-        destination = "local/bad-relays"
+        destination = "local/approved-routers"
       }
     }
   }
