@@ -10,6 +10,7 @@ echo $DA_HOST
 # Step 2: Authenticate and send reload signal to ControlPort
 echo "AUTHENTICATE" | nc $DA_HOST 9051
 echo "SIGNAL RELOAD" | nc $DA_HOST 9051
+echo "QUIT" | nc $DA_HOST 9051
 
 # Step 2: Authenticate and send reload signal to ControlPort
 #echo "AUTHENTICATE" | nc localhost 9051

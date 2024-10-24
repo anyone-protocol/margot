@@ -35,6 +35,16 @@ job "margot-job-dev" {
     task "margot-script" {
       driver = "docker"
 
+      template {
+        data = <<EOH
+	      {{- range service "dir-auth-dev-control-port" }}
+  	        DA_HOST="{{ .Address }}"
+	      {{ end -}}
+            EOH
+        destination = "secrets/file.env"
+        env         = true
+      }
+
       volume_mount {
         volume      = "dir-auth-dev"
         destination = "/usr/src/app/anon-data"
@@ -43,7 +53,7 @@ job "margot-job-dev" {
 
       config {
         volumes = ["local/approved-routers:/usr/src/app/approved-routers:ro"]
-        image = "ghcr.io/anyone-protocol/margot:DEPLOY_TAG"
+        image = "ghcr.io/anyone-protocol/margot:0d0025478266f5c5f105ef819a3b38fe2dd9a3ff"
       }
 
       template {
