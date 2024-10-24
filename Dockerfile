@@ -2,7 +2,7 @@
 FROM alpine:3.12
 
 # Install required tools like netcat
-RUN apk add --no-cache bash netcat
+RUN apk add --no-cache bash netcat-openbsd
 
 # Set the working directory
 WORKDIR /usr/src/app
