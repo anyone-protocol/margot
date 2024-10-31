@@ -9,6 +9,6 @@ echo $DA_HOST
 
 COOKIE=$(hexdump -v -e '/1 "%02x"' /usr/src/app/anon-data/control_auth_cookie | tr -d '\n')
 
-echo -e "authenticate ${COOKIE}\nsignal reload\nQUIT\n" | nc 127.0.0.1 9051
+echo -e "authenticate ${COOKIE}\nsignal reload\nQUIT\n" | nc $DA_HOST 9051
 
 echo "Configuration reloaded and approved-routers file updated."
