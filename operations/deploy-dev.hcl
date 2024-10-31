@@ -37,7 +37,7 @@ job "margot-job-dev" {
 
       template {
         data = <<EOH
-	      {{- range service "dir-auth-dev-control-port" }}
+	      {{- range service "dir-auth-dev-cp" }}
   	        DA_HOST="{{ .Address }}"
 	      {{ end -}}
             EOH
